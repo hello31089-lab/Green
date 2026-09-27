@@ -17,7 +17,24 @@
 
 @media (max-width: 900px) {
   .sidebar {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
     width: 100%;
     border-right: none;
+    transition:
+      transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+      visibility 0.28s;
+  }
+
+  .slideOut {
+    visibility: hidden;
+    transform: translateX(-100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar {
+    transition: none;
   }
 }

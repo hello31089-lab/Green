@@ -25,9 +25,10 @@ export function Sidebar({ chats, activeChatId, onSelectChat, onAddChat }: Sideba
   }, [chats, query])
 
   const isDark = theme === 'dark'
+  const classes = [styles.sidebar, activeChatId ? styles.slideOut : ''].filter(Boolean).join(' ')
 
   return (
-    <aside className={styles.sidebar}>
+    <aside className={classes}>
       <header className={styles.header}>
         <Title />
         <ButtonItem

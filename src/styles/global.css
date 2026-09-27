@@ -13,7 +13,8 @@ body {
   background-color: var(--color-bg);
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
-  overflow: hidden;
+  overflow: auto;
+  box-sizing: border-box;
 }
 
 a {

@@ -1,3 +1,10 @@
+.page {
+  position: relative;
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+
 .placeholder {
   display: grid;
   flex: 1;
