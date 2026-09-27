@@ -91,10 +91,6 @@ export function ChatView({ chat, messages, onSend, onBack }: ChatViewProps) {
     setDraft('')
   }
 
-  const handleCopyCode = (code: string) => {
-    void navigator.clipboard?.writeText(code)
-  }
-
   return (
     <section className={styles.view}>
       <header className={styles.header}>
@@ -116,7 +112,7 @@ export function ChatView({ chat, messages, onSend, onBack }: ChatViewProps) {
       <div className={styles.messages}>
         {messages.length === 0 && <p className={styles.empty}>Начните общение</p>}
         {messages.map((message) => (
-          <MessageBubble key={message.id} message={message} onCopyCode={handleCopyCode} />
+          <MessageBubble key={message.id} message={message} />
         ))}
         <div ref={bottomRef} />
       </div>
