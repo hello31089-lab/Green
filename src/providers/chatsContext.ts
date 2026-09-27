@@ -15,6 +15,11 @@ export interface ChatsContextValue {
   status: LoadStatus
   /** Ошибка загрузки списка, показывается в сайдбаре. */
   error: string | null
+  /**
+   * Причина, по которой очередь входящих недоступна. Не пустая строка
+   * означает, что новые сообщения не появятся, пока ошибка не устранена.
+   */
+  pollError: string | null
   isCreating: boolean
   getChat: (chatId: string) => Chat | undefined
   getMessages: (chatId: string) => ChatMessage[]

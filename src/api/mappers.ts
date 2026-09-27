@@ -26,13 +26,43 @@ export function typeLabel(type: ChatType): string {
   return TYPE_LABELS[type]
 }
 
-export function mapChat(source: GreenApiChat): Chat {
+/**
+ * Достаёт номер из идентификатора чата. У личного чата JID выглядит как
+ * `79991234567@c.us`, а у группы локальная часть — это
+ * `79526670710-1611399404`, где номер создателя группы, а не номер чата.
+ * Поэтому номер берётся только из 11–12 цифр подряд.
+ */
+export function phoneFromJid(jid: string | undefined): number | undefined {
+  if (!jid) return undefined
+  const local = jid.split('@')[0] ?? ''
+  return /^\d{11,12}$/.test(local) ? Number(local) : undefined
+}
+
+function unreadOf(value: number | undefined): number {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? Math.floor(value) : 0
+}
+
+/**
+ * Приводит чат из `GetChats` к модели приложения. Возвращает `null`, если
+ * в ответе нет идентификатора: такой чат нельзя ни открыть, ни отправить в
+ * него сообщение, поэтому он просто отбрасывается.
+ */
+export function mapChat(source: GreenApiChat): Chat | null {
+  // Идентификатор в MAX лежит в поле `id`.
+  const id = (source.id ?? source.chatId ?? '').trim()
+  if (!id) return null
+
+  const phoneNumber =
+    source.phoneNumber && source.phoneNumber > 0 ? source.phoneNumber : phoneFromJid(id)
+
   return {
-    id: source.chatId,
-    name: source.name?.trim() || formatPhone(source.phoneNumber) || 'Чат',
+    id,
+    name: source.name?.trim() || formatPhone(phoneNumber) || 'Чат',
     type: toChatType(source.type),
-    phoneNumber: source.phoneNumber > 0 ? source.phoneNumber : undefined,
-    unreadCount: 0,
+    phoneNumber,
+    // В ответе `GetChats` счётчик непрочитанных есть, в отличие от
+    // `GetChatHistory`, поэтому доверяем значению от API.
+    unreadCount: unreadOf(source.unreadCount),
   }
 }
 
@@ -104,15 +134,20 @@ export function mapIncomingNotification(notification: GreenApiNotification): Inc
   if (!messageData || !TEXT_TYPES.includes(messageData.typeMessage ?? '')) return null
 
   const text = messageData.textMessageData?.textMessage
-  const chatId = body.senderData?.chatId
+  // Как и в `GetChats`, идентификатор чата приходит в поле `id`.
+  const chatId = body.senderData?.id ?? body.senderData?.chatId
   const id = body.idMessage
   if (!text || !chatId || !id) return null
 
   const type = toChatType(body.senderData?.chatType)
+  const phoneNumber =
+    body.senderData?.senderPhoneNumber && body.senderData.senderPhoneNumber > 0
+      ? body.senderData.senderPhoneNumber
+      : phoneFromJid(chatId)
   const name =
     body.senderData?.senderContactName ||
     body.senderData?.senderName ||
-    formatPhone(body.senderData?.senderPhoneNumber) ||
+    formatPhone(phoneNumber) ||
     'Чат'
 
   return {
@@ -130,10 +165,7 @@ export function mapIncomingNotification(notification: GreenApiNotification): Inc
       id: chatId,
       name,
       type,
-      phoneNumber:
-        body.senderData?.senderPhoneNumber && body.senderData.senderPhoneNumber > 0
-          ? body.senderData.senderPhoneNumber
-          : undefined,
+      phoneNumber,
       lastMessage: text,
       lastMessageAt: body.timestamp ?? 0,
       unreadCount: 0,
@@ -143,7 +175,7 @@ export function mapIncomingNotification(notification: GreenApiNotification): Inc
 
 function hasAccount(
   value: CheckAccountResponse,
-): value is { exist: true; chatId: string; fromCache?: boolean } {
+): value is { exist: true; chatId?: string; id?: string; fromCache?: boolean } {
   return 'exist' in value && value.exist === true
 }
 
@@ -161,9 +193,9 @@ export function readCheckAccount(
     return { exists: false, reason: response.reason || 'Номер не найден в MAX' }
   }
 
-  if (hasAccount(response) && response.chatId) {
-    return { exists: true, chatId: response.chatId }
-  }
+  // Идентификатор приходит либо как `chatId`, либо как `id` — в MAX это JID.
+  const chatId = hasAccount(response) ? (response.chatId ?? response.id) : undefined
+  if (chatId) return { exists: true, chatId }
 
   return { exists: false, reason: 'На этом номере нет аккаунта MAX' }
 }

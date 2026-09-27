@@ -33,21 +33,39 @@ export interface StateInstanceResponse {
   stateInstance?: InstanceState
 }
 
-/** Элемент ответа `GetChats`. Метод отдаёт ровно четыре поля. */
+/**
+ * Элемент ответа `GetChats`.
+ *
+ * Идентификатор приходит в поле `id` и имеет вид JID:
+ * `79991234567@c.us` для личного чата и `79526670710-1611399404@g.us`
+ * для группы. Поле `chatId` в MAX не используется, но оставлено как
+ * запасной вариант: по нему можно опознать ответ другой версии API.
+ *
+ * Остальные поля приходят не у всех чатов: у группы номера нет, у
+ * архивного стоит `archive`, а `unreadCount` MAX, в отличие от
+ * `GetChatHistory`, действительно отдаёт.
+ */
 export interface GreenApiChat {
-  chatId: string
-  name: string
-  type: string
-  /** `0`, если номер скрыт или чат групповой. */
-  phoneNumber: number
+  id?: string
+  chatId?: string
+  name?: string
+  type?: string
+  archive?: boolean
+  ephemeralExpiration?: number
+  ephemeralSettingTimestamp?: number
+  unreadCount?: number
+  /** Заполняется не всегда; иначе номер берётся из JID. */
+  phoneNumber?: number
 }
 
 /**
  * Ответ `CheckAccount` — объединение двух форм.
- * Либо аккаунт найден и приходит `chatId`, либо причина отказа в `reason`.
+ * Либо аккаунт найден и приходит идентификатор чата, либо причина
+ * отказа в `reason`. Идентификатор, как и в `GetChats`, является JID.
  */
 export type CheckAccountResponse =
-  { exist: true; chatId: string; fromCache?: boolean } | { status: false; reason: string }
+  | { exist: true; chatId?: string; id?: string; fromCache?: boolean }
+  | { status: false; reason: string }
 
 export interface SendMessageResponse {
   idMessage?: string
@@ -109,6 +127,8 @@ export interface GreenApiNotificationBody {
   timestamp?: number
   idMessage?: string
   senderData?: {
+    /** Идентификатор чата. В MAX приходит в поле `id`, как JID. */
+    id?: string
     chatId?: string
     chatName?: string
     chatType?: string

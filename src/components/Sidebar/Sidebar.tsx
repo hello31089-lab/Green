@@ -13,6 +13,8 @@ export interface SidebarProps {
   activeChatId?: string
   status: LoadStatus
   error: string | null
+  /** Причина, по которой входящие сообщения не приходят. */
+  pollError: string | null
   onSelectChat: (chatId: string) => void
   onAddChat: () => void
   onRetry: () => void
@@ -23,6 +25,7 @@ export function Sidebar({
   activeChatId,
   status,
   error,
+  pollError,
   onSelectChat,
   onAddChat,
   onRetry,
@@ -69,6 +72,7 @@ export function Sidebar({
         activeChatId={activeChatId}
         status={status}
         error={error}
+        pollError={pollError}
         onSelect={onSelectChat}
         onRetry={onRetry}
       />

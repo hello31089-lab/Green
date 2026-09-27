@@ -22,7 +22,12 @@ const METHODS: Record<string, MethodSpec> = {
   getStateInstance: { http: 'GET' },
   getAccountSettings: { http: 'GET' },
 
-  sendMessage: { http: 'POST', body: ['chatId', 'message', 'typingTime', 'quotedMessageId'] },
+  sendMessage: {
+    http: 'POST',
+    // `id` дублирует `chatId`: в MAX идентификатор приходит в поле `id`,
+    // а методы истории и отправки в разных версиях ждут то или другое.
+    body: ['chatId', 'id', 'message', 'typingTime', 'quotedMessageId'],
+  },
   receiveNotification: { http: 'GET', query: ['receiveTimeout'] },
   deleteNotification: { http: 'DELETE', path: ['receiptId'] },
 
@@ -32,7 +37,7 @@ const METHODS: Record<string, MethodSpec> = {
     body: ['webhookUrl', 'incomingWebhook', 'outgoingWebhook', 'stateWebhook'],
   },
   getChats: { http: 'GET' },
-  getChatHistory: { http: 'POST', body: ['chatId', 'count'] },
+  getChatHistory: { http: 'POST', body: ['chatId', 'id', 'count'] },
 }
 
 export interface ProxyRequest {

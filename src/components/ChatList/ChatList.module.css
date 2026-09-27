@@ -21,6 +21,16 @@
   text-align: center;
 }
 
+.notice {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: var(--font-size-meta);
+  line-height: 1.4;
+  color: #9a6a00;
+  background: rgba(255, 193, 7, 0.12);
+  border-bottom: 1px solid rgba(255, 193, 7, 0.25);
+}
+
 .retry {
   display: block;
   margin: 10px auto 0;

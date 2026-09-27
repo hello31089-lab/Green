@@ -35,12 +35,29 @@ interface HistoryState {
 
 /** Пауза между опросами очереди, чтобы не упираться в лимит частоты запросов. */
 const POLL_PAUSE_MS = 500
+/**
+ * Потолок backoff. Секунды: 1 → 2 → 4 → 8 → 16 → 30.
+ * Без него опрос при включённом webhook забивал бы API запросами: метод
+ * отвечает ошибкой мгновенно, и цикл повторял бы её дважды в секунду.
+ */
+const POLL_MAX_PAUSE_MS = 30_000
 const HISTORY_LIMIT = 100
 
 function describeError(thrown: unknown, fallback: string): string {
   if (thrown instanceof GreenApiError) return thrown.message || fallback
   if (thrown instanceof Error && thrown.message) return thrown.message
   return fallback
+}
+
+/**
+ * Ошибки, при которых повторять запрос бессмысленно: метод недоступен для
+ * этого инстанса, нет прав или инстанс не авторизован. Повтор только съедает
+ * квоту частоты запросов, поэтому на такой ошибке опрос останавливается.
+ */
+function isFatalPollError(thrown: unknown): boolean {
+  if (!(thrown instanceof GreenApiError)) return false
+  if (thrown.status === 429 || thrown.status === 0) return false
+  return thrown.status >= 400 && thrown.status < 500
 }
 
 /** Наложение патча без затирания полей, которых в патче нет. */
@@ -56,9 +73,11 @@ function mergeDefined(base: Chat, patch: Partial<Chat>): Chat {
 }
 
 /**
- * Ответ `GetChats` содержит только `chatId`, `name`, `type` и `phoneNumber`,
- * поэтому локальные чаты (созданные по номеру) добавляются в список, а для
- * известных чатов сохраняются превью и счётчик непрочитанных.
+ * Ответ `GetChats` содержит идентификатор в поле `id`, имя, тип и счётчик
+ * непрочитанных, но не содержит последнего сообщения. Поэтому локальные чаты
+ * (созданные по номеру и обогащённые входящими) добавляются в список, а для
+ * известных чатов сохраняются превью. Счётчик непрочитанных, наоборот,
+ * берётся из ответа API: он единственный, кто знает про непрочитанные.
  */
 function mergeChats(remote: Chat[], local: Chat[]): Chat[] {
   const localById = new Map(local.map((chat) => [chat.id, chat]))
@@ -88,6 +107,7 @@ export function ChatsProvider({ children }: ChatsProviderProps) {
   const [history, setHistory] = useState<Record<string, HistoryState>>({})
   const [status, setStatus] = useState<LoadStatus>('loading')
   const [error, setError] = useState<string | null>(null)
+  const [pollError, setPollError] = useState<string | null>(null)
   const [isCreating, setIsCreating] = useState(false)
   const [reloadToken, setReloadToken] = useState(0)
 
@@ -114,7 +134,9 @@ export function ChatsProvider({ children }: ChatsProviderProps) {
       try {
         const remote = await getChats(credentials, signal)
         if (signal.aborted) return
-        setChats((current) => mergeChats((remote ?? []).map(mapChat), current))
+        // `mapChat` возвращает `null` для чатов без идентификатора.
+        const mapped = (remote ?? []).map(mapChat).filter((chat): chat is Chat => chat !== null)
+        setChats((current) => mergeChats(mapped, current))
         setStatus('ready')
         setError(null)
       } catch (thrown) {
@@ -287,12 +309,16 @@ export function ChatsProvider({ children }: ChatsProviderProps) {
 
     const controller = new AbortController()
     const { signal } = controller
+    let pause = POLL_PAUSE_MS
 
     void (async () => {
       while (!signal.aborted) {
         try {
           const notification = await receiveNotification(credentials, signal)
           if (signal.aborted) break
+
+          // Успешный ответ, даже пустой, — сбрасываем backoff.
+          pause = POLL_PAUSE_MS
 
           if (notification?.receiptId === undefined) {
             // Очередь пуста. Обычно GREEN-API держит запрос открытым до
@@ -325,13 +351,22 @@ export function ChatsProvider({ children }: ChatsProviderProps) {
           })
         } catch (thrown) {
           if (signal.aborted) break
-          // Ошибка не должна ронять опрос: у GREEN-API есть лимит частоты
-          // запросов, поэтому просто ждём и пробуем снова.
-          await wait(
-            thrown instanceof GreenApiError && thrown.status === 429
-              ? POLL_PAUSE_MS * 4
-              : POLL_PAUSE_MS,
-          )
+
+          if (isFatalPollError(thrown)) {
+            // Например, у инстанса включён webhook и `ReceiveNotification`
+            // недоступен. Повторять бесполезно — показываем причину.
+            setPollError(
+              `Входящие сообщения не приходят: ${describeError(
+                thrown,
+                'очередь уведомлений недоступна',
+              )}. В настройках инстанса очистите webhookUrl.`,
+            )
+            break
+          }
+
+          // Растём по backoff, чтобы не упираться в лимит частоты запросов.
+          await wait(pause)
+          pause = Math.min(pause * 2, POLL_MAX_PAUSE_MS)
         }
       }
     })()
@@ -352,6 +387,7 @@ export function ChatsProvider({ children }: ChatsProviderProps) {
       chats,
       status,
       error,
+      pollError,
       isCreating,
       getChat,
       getMessages,
@@ -367,6 +403,7 @@ export function ChatsProvider({ children }: ChatsProviderProps) {
       chats,
       status,
       error,
+      pollError,
       isCreating,
       getChat,
       getMessages,
