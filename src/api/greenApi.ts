@@ -72,6 +72,15 @@ async function call<T>(
   const data: unknown = text ? safeParse(text) : null
 
   if (!response.ok) {
+    // Тело не JSON — ответил не наш прокси, а сам Vite / хостинг.
+    // Значит, функция не смонтирована, а не проблема в учётных данных.
+    if (data === null && (response.status === 404 || response.status === 405)) {
+      throw new GreenApiError(
+        'Прокси GREEN-API не найден. Запустите проект через `npm run dev` или `npx vercel dev`.',
+        response.status,
+      )
+    }
+
     throw new GreenApiError(
       readErrorMessage(data, `Запрос завершился с кодом ${response.status}`),
       response.status,

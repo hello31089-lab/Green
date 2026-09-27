@@ -43,6 +43,13 @@ npm run format
 `x-green-token` и телом `{ method, payload }`. Функция держит белый список
 методов, собирает URL GREEN-API и проксирует ответ как есть.
 
+Обработчик лежит в `server/greenApiProxy.ts`. Его используют обе точки входа:
+`api/green-api.ts` — serverless-функция на Vercel, и dev-сервер Vite
+(плагин `greenApiDevProxy` в `vite.config.ts`). Поэтому `npm run dev` тоже
+работает: Vite монтирует тот же обработчик на `/api/green-api`.
+Без этого плагина подключение инстанса падало бы с 404 — serverless-функции
+выполняет только Vercel, обычный Vite про `/api` ничего не знает.
+
 | Задача               | Метод GREEN-API                              |
 | -------------------- | -------------------------------------------- |
 | Проверка инстанса    | `GetStateInstance`                           |
