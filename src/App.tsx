@@ -1,11 +1,15 @@
+import { BrowserRouter } from 'react-router-dom'
 import './App.css'
-import { Chat } from './pages/Chat'
+import { AppRoutes } from './routes/AppRoutes'
+import { ChatsProvider } from './providers/ChatsProvider'
 
 function App() {
   return (
-    <>
-      <Chat chats={[]} messages={[]} onSelectChat={() => {}} onSend={() => {}} />
-    </>
+    <BrowserRouter>
+      <ChatsProvider>
+        <AppRoutes />
+      </ChatsProvider>
+    </BrowserRouter>
   )
 }
 

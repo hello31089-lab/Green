@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import type { Chat, ChatMessage } from '../../types/chat'
+import { ButtonItem } from '../ButtonItem'
 import styles from './ChatView.module.css'
 
 export interface ChatViewProps {
@@ -26,7 +27,7 @@ export function ChatView({ chat, messages, onSend }: ChatViewProps) {
   }
 
   if (!chat) {
-    return <section className={styles.placeholder}>Select a chat to start messaging</section>
+    return <section className={styles.placeholder}>Выберите чат для общения</section>
   }
 
   return (
@@ -53,12 +54,17 @@ export function ChatView({ chat, messages, onSend }: ChatViewProps) {
           className={styles.input}
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
-          placeholder="Type a message"
-          aria-label="Message"
+          placeholder="Введите сообщение"
+          aria-label="Сообщение"
         />
-        <button className={styles.send} type="submit" disabled={!draft.trim()}>
-          Send
-        </button>
+        <ButtonItem
+          icon="➤"
+          label="Отправить"
+          type="submit"
+          shape="rounded"
+          variant="primary"
+          disabled={!draft.trim()}
+        />
       </form>
     </section>
   )

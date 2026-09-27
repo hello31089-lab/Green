@@ -1,0 +1,33 @@
+.page {
+  display: flex;
+  height: 100%;
+}
+
+.notFound {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-unit);
+  text-align: center;
+}
+
+.notFoundTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.notFoundText {
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: var(--color-muted);
+}
+
+.notFound code {
+  padding: 2px 6px;
+  font-size: 13px;
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+}

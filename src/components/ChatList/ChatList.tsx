@@ -10,7 +10,7 @@ export interface ChatListProps {
 
 export function ChatList({ chats, activeChatId, onSelect }: ChatListProps) {
   if (chats.length === 0) {
-    return <p className={styles.empty}>No chats found</p>
+    return <p className={styles.empty}>Чаты не найдены</p>
   }
 
   return (

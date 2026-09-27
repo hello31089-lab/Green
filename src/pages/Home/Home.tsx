@@ -1,16 +1,28 @@
-import type { Chat } from '../../types/chat'
+import { useNavigate } from 'react-router-dom'
 import { Sidebar } from '../../components/Sidebar'
+import { useChats } from '../../hooks/useChats'
+import styles from './Home.module.css'
 
-export interface HomeProps {
-  chats: Chat[]
-  activeChatId?: string
-  onSelectChat: (chatId: string) => void
-}
+export function Home() {
+  const navigate = useNavigate()
+  const { chats, addChat } = useChats()
 
-export function Home({ chats, activeChatId, onSelectChat }: HomeProps) {
+  const handleAddChat = () => {
+    const id = addChat(`Чат ${chats.length + 1}`)
+    navigate(`/chat/${id}`)
+  }
+
   return (
-    <div style={{ display: 'flex', height: '100%' }}>
-      <Sidebar chats={chats} activeChatId={activeChatId} onSelectChat={onSelectChat} />
+    <div className={styles.page}>
+      <Sidebar
+        chats={chats}
+        onSelectChat={(id) => navigate(`/chat/${id}`)}
+        onAddChat={handleAddChat}
+      />
+      <div className={styles.placeholder}>
+        <p>Выберите чат, чтобы открыть переписку</p>
+        <p className={styles.hint}>или создайте новый кнопкой «+»</p>
+      </div>
     </div>
   )
 }

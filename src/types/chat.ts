@@ -22,3 +22,8 @@ export interface ChatUser {
   name: string
   avatarUrl?: string
 }
+
+export interface ChatState {
+  chats: Chat[]
+  messages: Record<string, ChatMessage[]>
+}
