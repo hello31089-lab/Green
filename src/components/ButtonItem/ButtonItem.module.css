@@ -11,6 +11,11 @@
     border-color 0.15s ease;
 }
 
+.item > svg {
+  width: 55%;
+  height: 55%;
+}
+
 .item:disabled {
   opacity: 0.5;
   cursor: default;
