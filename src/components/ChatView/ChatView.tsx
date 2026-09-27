@@ -102,14 +102,9 @@ export function ChatView({ chat, messages, onSend, onBack }: ChatViewProps) {
   return (
     <section className={styles.view}>
       <header className={styles.header}>
-        <ButtonItem
-          icon="←"
-          label="Назад"
-          shape="circle"
-          size="sm"
-          className={styles.back}
-          onClick={onBack}
-        />
+        <span className={styles.back}>
+          <ButtonItem icon="←" label="Назад" shape="circle" size="sm" onClick={onBack} />
+        </span>
         <Avatar name={chat.name} kind={chat.avatar} src={chat.avatarUrl} size="sm" />
         <div className={styles.headerBody}>
           <span className={styles.headerName}>

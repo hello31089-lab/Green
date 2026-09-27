@@ -23,8 +23,8 @@
 
 .body {
   display: flex;
-  flex-direction: column;
   flex: 1;
+  flex-direction: column;
   gap: 3px;
   min-width: 0;
 }
@@ -43,6 +43,10 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.unread .name {
+  font-weight: 700;
 }
 
 .preview {

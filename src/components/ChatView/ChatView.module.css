@@ -52,7 +52,6 @@
 .back {
   display: none;
 }
-
 .messages {
   display: flex;
   flex: 1;
@@ -119,7 +118,7 @@
 
 @media (max-width: 900px) {
   .back {
-    display: grid;
+    display: block;
   }
 
   .messages {

@@ -11,7 +11,13 @@ export interface ChatItemProps {
 
 export function ChatItem({ chat, isActive = false, onSelect }: ChatItemProps) {
   const handleClick = () => onSelect(chat.id)
-  const classes = [styles.item, isActive ? styles.active : ''].filter(Boolean).join(' ')
+  const classes = [
+    styles.item,
+    isActive ? styles.active : '',
+    chat.unreadCount > 0 ? styles.unread : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <button

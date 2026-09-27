@@ -52,6 +52,7 @@ export function Chat() {
         chat={getChat(chatId)}
         messages={getMessages(chatId)}
         onSend={(text) => sendMessage(chatId, text)}
+        onBack={() => navigate('/')}
       />
     </div>
   )
