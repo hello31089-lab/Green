@@ -1,0 +1,34 @@
+.searchBar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-unit);
+}
+
+.input {
+  width: 100%;
+  padding: 8px 32px 8px 12px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--color-text);
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  outline: none;
+}
+
+.input:focus {
+  border-color: var(--color-primary);
+}
+
+.clear {
+  position: absolute;
+  right: calc(var(--spacing-unit) + 8px);
+  padding: 0 4px;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--color-text);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
