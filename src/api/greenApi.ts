@@ -136,27 +136,19 @@ export function checkAccount(
 }
 
 /**
- * Идентификатор чата отправляется под двумя именами. В `GetChats` MAX
- * отдаёт его в поле `id`, тогда как методы истории и отправки в документации
- * описаны с `chatId`. Значение одно и то же — JID, а лишние поля API
- * игнорирует, поэтому такой вызов работает с обоими контрактами.
+ * Идентификатор чата уходит в поле `chatId` — именно это имя ждёт API в
+ * теле запроса. Поля `id` в теле быть не должно: тело проверяется строго и
+ * лишний ключ отклоняется с "Validation failed. Details: 'id' is not
+ * allowed". Уточнение касается только ответа `GetChats`, где идентификатор
+ * приходит в поле `id`.
  */
-function chatRef(chatId: string): Record<string, string> {
-  return { chatId, id: chatId }
-}
-
 export function getChatHistory(
   credentials: GreenApiCredentials,
   chatId: string,
   count = 100,
   signal?: AbortSignal,
 ): Promise<GreenApiHistoryMessage[] | null> {
-  return call<GreenApiHistoryMessage[]>(
-    'getChatHistory',
-    credentials,
-    { ...chatRef(chatId), count },
-    signal,
-  )
+  return call<GreenApiHistoryMessage[]>('getChatHistory', credentials, { chatId, count }, signal)
 }
 
 export function sendMessage(
@@ -165,12 +157,7 @@ export function sendMessage(
   message: string,
   signal?: AbortSignal,
 ): Promise<SendMessageResponse | null> {
-  return call<SendMessageResponse>(
-    'sendMessage',
-    credentials,
-    { ...chatRef(chatId), message },
-    signal,
-  )
+  return call<SendMessageResponse>('sendMessage', credentials, { chatId, message }, signal)
 }
 
 /**

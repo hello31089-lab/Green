@@ -22,12 +22,10 @@ const METHODS: Record<string, MethodSpec> = {
   getStateInstance: { http: 'GET' },
   getAccountSettings: { http: 'GET' },
 
-  sendMessage: {
-    http: 'POST',
-    // `id` дублирует `chatId`: в MAX идентификатор приходит в поле `id`,
-    // а методы истории и отправки в разных версиях ждут то или другое.
-    body: ['chatId', 'id', 'message', 'typingTime', 'quotedMessageId'],
-  },
+  // Тело проверяется API строго: лишние поля вызывают
+  // "Validation failed. Details: '<поле>' is not allowed". Поэтому здесь
+  // ровно те поля, которые принимает метод, ничего больше.
+  sendMessage: { http: 'POST', body: ['chatId', 'message', 'typingTime', 'quotedMessageId'] },
   receiveNotification: { http: 'GET', query: ['receiveTimeout'] },
   deleteNotification: { http: 'DELETE', path: ['receiptId'] },
 
@@ -37,7 +35,7 @@ const METHODS: Record<string, MethodSpec> = {
     body: ['webhookUrl', 'incomingWebhook', 'outgoingWebhook', 'stateWebhook'],
   },
   getChats: { http: 'GET' },
-  getChatHistory: { http: 'POST', body: ['chatId', 'id', 'count'] },
+  getChatHistory: { http: 'POST', body: ['chatId', 'count'] },
 }
 
 export interface ProxyRequest {
