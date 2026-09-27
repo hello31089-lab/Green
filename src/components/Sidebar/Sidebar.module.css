@@ -17,11 +17,14 @@
 
 @media (max-width: 900px) {
   .sidebar {
-    position: absolute;
     inset: 0;
     z-index: 2;
     width: 100%;
+    position: absolute;
+    top: 0;
+    right: 0;
     border-right: none;
+    transform: translateX(0%);
     transition:
       transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
       visibility 0.28s;

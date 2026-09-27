@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { Chat, ChatMessage, ChatState } from '../types/chat'
 import { loadChatState, saveChatState } from '../lib/storage'
+import { createId } from '../lib/id'
 import { ChatsContext } from './chatsContext'
 import type { ChatsContextValue } from './chatsContext'
 
@@ -21,7 +22,7 @@ export function ChatsProvider({ children }: ChatsProviderProps) {
   }, [state])
 
   const addChat = useCallback((name: string) => {
-    const id = crypto.randomUUID()
+    const id = createId()
     const chat: Chat = {
       id,
       name,
@@ -39,7 +40,7 @@ export function ChatsProvider({ children }: ChatsProviderProps) {
   const sendMessage = useCallback((chatId: string, text: string) => {
     setState((current) => {
       const message: ChatMessage = {
-        id: crypto.randomUUID(),
+        id: createId(),
         chatId,
         authorId: 'me',
         text,

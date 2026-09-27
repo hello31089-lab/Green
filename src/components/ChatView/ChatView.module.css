@@ -4,7 +4,8 @@
   flex-direction: column;
   min-width: 0;
   height: 100%;
-  background: var(--color-bg-chat);
+  background-color: var(--color-bg-chat);
+  background-image: var(--pattern-chat);
 }
 
 .placeholder {
@@ -59,17 +60,29 @@
   gap: 10px;
   padding: 16px 40px;
   overflow-y: auto;
-  background-color: var(--color-bg-chat);
-  background-image: var(--pattern-chat);
+}
+
+.empty {
+  width: 100%;
+  margin: auto 0;
+  font-size: var(--font-size-chat-name);
+  color: var(--color-text-secondary);
+  text-align: center;
 }
 
 .composer {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 10px 12px;
+  width: calc(100% - 32px);
+  max-width: 760px;
+  min-height: 48px;
+  margin: 0 auto 16px;
+  padding: 6px 12px;
   background: var(--color-bg);
-  border-top: 1px solid var(--color-border);
+  border: none;
+  border-radius: var(--radius-pill);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .input {
@@ -123,5 +136,18 @@
 
   .messages {
     padding: 16px 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .composer {
+    width: 100%;
+    max-width: none;
+    min-height: 0;
+    margin: 0;
+    padding: 10px 12px;
+    border-top: 1px solid var(--color-border);
+    border-radius: 0;
+    box-shadow: none;
   }
 }

@@ -118,6 +118,7 @@ export function ChatView({ chat, messages, onSend, onBack }: ChatViewProps) {
       </header>
 
       <div className={styles.messages}>
+        {messages.length === 0 && <p className={styles.empty}>Начните общение</p>}
         {messages.map((message) => (
           <MessageBubble key={message.id} message={message} onCopyCode={handleCopyCode} />
         ))}
