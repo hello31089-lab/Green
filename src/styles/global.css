@@ -1,18 +1,26 @@
 @import './variables.css';
 
 html,
-body {
+body,
+#root {
   height: 100%;
 }
 
 body {
   font-family: var(--font-family);
   font-size: var(--font-size-base);
+  line-height: 1.4;
   background-color: var(--color-bg);
   color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
 }
 
 a {
   color: var(--color-primary);
   text-decoration: none;
+}
+
+button {
+  font-family: inherit;
 }
