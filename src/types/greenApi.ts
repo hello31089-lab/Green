@@ -23,7 +23,8 @@ export interface QuotaStatus {
 }
 
 /**
- * Состояние инстанса MAX. Значения — как в ответе `GetStateInstance`.
+ * Состояние инстанса. Значения — как в ответе `GetStateInstance`, и для
+ * MAX, WhatsApp и Telegram набор одинаковый.
  * Важно: `notAuthorized`, а не `unauthorized`; `qr` в этом перечне отсутствует.
  */
 export type InstanceState =
@@ -36,14 +37,15 @@ export interface StateInstanceResponse {
 /**
  * Элемент ответа `GetChats`.
  *
- * Идентификатор приходит в поле `id` и имеет вид JID:
- * `79991234567@c.us` для личного чата и `79526670710-1611399404@g.us`
- * для группы. Поле `chatId` в MAX не используется, но оставлено как
- * запасной вариант: по нему можно опознать ответ другой версии API.
+ * Формат идентификатора зависит от мессенджера: в MAX и WhatsApp это JID
+ * (`79991234567@c.us` для личного чата, `79526670710-1611399404@g.us` для
+ * группы), в Telegram — число. Поле тоже называется по-разному: в MAX
+ * идентификатор приходит в `id`, а в части методов — в `chatId`. Поэтому
+ * оба поля читаются, а неоднозначность разрешается в мапперах.
  *
  * Остальные поля приходят не у всех чатов: у группы номера нет, у
- * архивного стоит `archive`, а `unreadCount` MAX, в отличие от
- * `GetChatHistory`, действительно отдаёт.
+ * архивного стоит `archive`, а `unreadCount`, в отличие от
+ * `GetChatHistory`, действительно отдаётся.
  */
 export interface GreenApiChat {
   id?: string
@@ -78,9 +80,9 @@ export interface DeleteNotificationResponse {
 
 /**
  * Сообщение из `GetChatHistory`. Сортировка — по убыванию времени.
- * Поля помечены необязательными, потому что документация MAX расходится
- * сама с собой: например, `senderId` есть в примерах, но отсутствует
- * в таблице полей.
+ * Поля помечены необязательными, потому что наборы полей различаются между
+ * мессенджерами и версиями API: например, `senderId` есть в примерах, но
+ * отсутствует в таблице полей.
  */
 export interface GreenApiHistoryMessage {
   type?: 'incoming' | 'outgoing'
@@ -127,7 +129,7 @@ export interface GreenApiNotificationBody {
   timestamp?: number
   idMessage?: string
   senderData?: {
-    /** Идентификатор чата. В MAX приходит в поле `id`, как JID. */
+    /** Идентификатор чата: в MAX приходит в поле `id` и выглядит как JID. */
     id?: string
     chatId?: string
     chatName?: string

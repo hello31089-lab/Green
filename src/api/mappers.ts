@@ -48,7 +48,7 @@ function unreadOf(value: number | undefined): number {
  * него сообщение, поэтому он просто отбрасывается.
  */
 export function mapChat(source: GreenApiChat): Chat | null {
-  // Идентификатор в MAX лежит в поле `id`.
+  // В MAX идентификатор лежит в поле `id`, в других ответах — в `chatId`.
   const id = (source.id ?? source.chatId ?? '').trim()
   if (!id) return null
 
@@ -190,14 +190,16 @@ export function readCheckAccount(
   if (!response) return { exists: false, reason: 'Пустой ответ от GREEN-API' }
 
   if (isRejected(response)) {
-    return { exists: false, reason: response.reason || 'Номер не найден в MAX' }
+    return { exists: false, reason: response.reason || 'Номер не найден' }
   }
 
-  // Идентификатор приходит либо как `chatId`, либо как `id` — в MAX это JID.
+  // Идентификатор приходит либо как `chatId`, либо как `id`: в MAX это JID
+  // вида `79526670710-1611399404@g.us`, а в Telegram — число, поэтому читаем
+  // оба поля.
   const chatId = hasAccount(response) ? (response.chatId ?? response.id) : undefined
   if (chatId) return { exists: true, chatId }
 
-  return { exists: false, reason: 'На этом номере нет аккаунта MAX' }
+  return { exists: false, reason: 'На этом номере нет аккаунта' }
 }
 
 export function formatPhone(phone: number | string | undefined): string {

@@ -65,7 +65,8 @@ export function NewChatDialog({ isSubmitting, onSubmit, onClose }: NewChatDialog
               Новый чат
             </h2>
             <p className={styles.subtitle}>
-              Введите номер телефона. Если на нём есть аккаунт MAX, откроется переписка с ним.
+              Введите номер телефона. Если на нём есть аккаунт в мессенджере, откроется переписка с
+              ним.
             </p>
           </div>
           <button

@@ -21,20 +21,16 @@ const AUTHORIZED: InstanceState = 'authorized'
 
 const KNOWN_STATUSES = new Set([400, 401, 403, 404, 429, 466, 469, 502])
 
-/** Ответ пришёл не от нашего прокси — значит не смонтирован, а не неверные данные. */
 const PROXY_MISSING_STATUSES = new Set([404, 405])
 
 type VerifyResult = { ok: true } | { ok: false; message: string }
 
-/**
- * Ошибки `GetStateInstance` для неавторизованного инстанса приходят
- * с кодом 200 и заполненным `stateInstance`, поэтому состояние важнее кода.
- */
 const STATE_MESSAGES: Record<InstanceState, string> = {
-  notAuthorized: 'Инстанс не авторизован в MAX. Отсканируйте QR-код в личном кабинете GREEN-API.',
+  notAuthorized:
+    'Инстанс не авторизован. Отсканируйте QR-код в личном кабинете GREEN-API или авторизуйтесь там другим способом.',
   starting: 'Инстанс запускается. Это занимает до 5 минут, попробуйте позже.',
   blocked:
-    'Аккаунт MAX заблокирован. После перезапуска инстанса он вернётся в статус «не авторизован».',
+    'Аккаунт заблокирован. После перезапуска инстанса он вернётся в статус «не авторизован».',
   suspended:
     'На аккаунте временные ограничения: отправка возможна только номерам, сохранившим ваш номер в контактах.',
   pendingPassword: 'Для завершения авторизации нужен пароль двухфакторной аутентификации.',
@@ -63,7 +59,7 @@ function describeFailure(status: number, instanceState: InstanceState | null): s
     case 429:
       return 'Превышен лимит запросов. Подождите минуту и повторите попытку.'
     case 466:
-      return 'Исчерпан лимит тарифа MAX Developer.'
+      return 'Исчерпан лимит тарифа GREEN-API Developer.'
     case 469:
       return 'Слишком много проверок номеров подряд. Сделайте паузу примерно на 2 часа.'
     case 502:
@@ -77,8 +73,6 @@ function describeFailure(status: number, instanceState: InstanceState | null): s
 
 function toMessage(thrown: unknown, instanceState: InstanceState | null): string {
   if (thrown instanceof GreenApiError) {
-    // Сообщение прокси важнее стандартной расшифровки: оно точнее
-    // описывает, что именно сломалось на его стороне.
     if (PROXY_MISSING_STATUSES.has(thrown.status) || thrown.status === 0) {
       return thrown.message || describeFailure(thrown.status, instanceState)
     }

@@ -1,4 +1,7 @@
-/** Тип чата в MAX. `GetChats` отдаёт эти значения в поле `type`. */
+/**
+ * Тип чата. `GetChats` отдаёт эти значения в поле `type` одинаково для
+ * MAX, WhatsApp и Telegram.
+ */
 export type ChatType = 'user' | 'group' | 'channel' | 'bot'
 
 export type MessageStatus = 'sending' | 'sent' | 'read'

@@ -91,10 +91,10 @@ export function Auth({ redirectTo = '/' }: AuthProps) {
     <main className={styles.page}>
       <div className={styles.card}>
         <div className={styles.brand}>
-          <span className={styles.logo}>M</span>
+          <span className={styles.logo}>G</span>
           <div>
             <h1 className={styles.title}>Подключение к GREEN-API</h1>
-            <p className={styles.subtitle}>Чат MAX через ваш инстанс</p>
+            <p className={styles.subtitle}>Чаты MAX, WhatsApp и Telegram через ваш инстанс</p>
           </div>
         </div>
 
