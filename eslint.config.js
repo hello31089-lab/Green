@@ -19,4 +19,15 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  {
+    // Serverless-функции для Vercel: среда Node, а не браузер.
+    files: ['api/**/*.ts'],
+    extends: [js.configs.recommended, tseslint.configs.recommended],
+    languageOptions: {
+      globals: globals.node,
+    },
+    rules: {
+      'no-undef': 'off',
+    },
+  },
 ])

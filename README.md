@@ -1,76 +1,72 @@
-# React + TypeScript + Vite
+# MAX-чат через GREEN-API
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Прототип интерфейса мессенджера MAX (https://web.max.ru/) для отправки и получения
+текстовых сообщений через [GREEN-API](https://green-api.com/max).
 
-Currently, two official plugins are available:
+Стек: React 19 + TypeScript + Vite, сборка и деплой — Vercel.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Возможности
 
-## React Compiler
+- Подключение к инстансу GREEN-API по `idInstance` и `apiTokenInstance`
+- Проверка инстанса через `GetStateInstance` перед входом
+- Список чатов с поиском, непрочитанными счётчиками и статусами
+- Переписка, оформленная как в MAX: пузыри, карточка кода, тёмная тема
+- Адаптивная вёрстка: на мобильных список чатов уезжает вбок
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+## Запуск
 
-Note: This will impact Vite dev & build performances.
-You can also try [the experimental native React Compiler support in plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md#rust-react-compiler) by using `compiler: true` in the plugin options instead of using the Babel plugin.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev      # http://localhost:5173
+npm run build    # tsc -b && vite build
+npm run preview
+npm run lint
+npm run format
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+## Переменные окружения
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Обязательных переменных нет: пользователь вводит учётные данные инстанса
+в интерфейсе, они сохраняются в `localStorage` браузера.
+`.env.example` — заготовка на случай, если понадобится инстанс по умолчанию.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Как устроена интеграция
+
+Браузер не ходит в GREEN-API напрямую. Все запросы идут через serverless-функцию
+`api/green-api.ts` (Vercel), потому что:
+
+1. GREEN-API не отдаёт CORS-заголовки для cross-origin вызовов из браузера.
+2. `apiTokenInstance` входит в путь URL GREEN-API — напрямую из клиента он
+   осел бы в истории браузера и в devtools.
+
+Клиент шлёт `POST /api/green-api` с заголовками `x-green-id-instance`,
+`x-green-token` и телом `{ method, payload }`. Функция держит белый список
+методов, собирает URL GREEN-API и проксирует ответ как есть.
+
+| Задача | Метод GREEN-API |
+| --- | --- |
+| Проверка инстанса | `GetStateInstance` |
+| Отправка текста | `SendMessage` |
+| Входящие уведомления | `ReceiveNotification` + `DeleteNotification` |
+
+Для приёма сообщений в настройках инстанса `webhookUrl` должен быть пустым,
+а `incomingWebhook` / `outgoingWebhook` / `stateWebhook` — включены
+(настраивается в личном кабинете или через `SetSettings`).
+
+## Деплой на Vercel
+
+```bash
+npx vercel
 ```
+
+`vercel.json` содержит rewrite для SPA, чтобы `/chat/:id` переживал перезагрузку
+страницы. Функция `api/green-api.ts` задеплоится как serverless-функция.
+
+## Ограничения прототипа
+
+- Токен хранится в `localStorage`, то есть доступен скриптам на этой странице.
+  Для продакшена нужны serverless-сессии или бэкенд.
+- `idInstance` и `apiTokenInstance` передаются в serverless-функцию из браузера
+  пользователя. Это токен самого пользователя, секретов приложения в репозитории нет.
+- Состояние чатов пока хранится в `localStorage` и заполняется моками
+  из `src/mock/chats.ts`; переход на реальные данные GREEN-API — следующий шаг.
