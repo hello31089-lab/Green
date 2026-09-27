@@ -9,7 +9,6 @@ export interface CredentialsContextValue {
   status: CredentialsStatus
   instanceState: string | null
   error: string | null
-  /** Возвращает ошибки полей, либо `null` при успешной авторизации. */
   authorize: (values: GreenApiCredentials) => Promise<CredentialsErrors | null>
   signOut: () => void
 }
