@@ -1,16 +1,81 @@
 import { useEffect, useRef, useState } from 'react'
-import type { FormEvent } from 'react'
+import type { FormEvent, ReactNode } from 'react'
 import type { Chat, ChatMessage } from '../../types/chat'
+import { Avatar } from '../Avatar'
 import { ButtonItem } from '../ButtonItem'
+import { MessageBubble } from '../MessageBubble'
+import { VerifiedBadge } from '../VerifiedBadge'
 import styles from './ChatView.module.css'
 
 export interface ChatViewProps {
   chat?: Chat
   messages: ChatMessage[]
   onSend: (text: string) => void
+  onBack?: () => void
 }
 
-export function ChatView({ chat, messages, onSend }: ChatViewProps) {
+function StickerIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="9" cy="10" r="1.4" fill="currentColor" stroke="none" />
+      <circle cx="15" cy="10" r="1.4" fill="currentColor" stroke="none" />
+      <path d="M8.5 15c1 1.2 2.2 1.8 3.5 1.8s2.5-.6 3.5-1.8" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function ClipIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <path
+        d="M20 11.5 12 19.5a4.5 4.5 0 0 1-6.4-6.4l8-8a3 3 0 0 1 4.3 4.3l-8 8a1.5 1.5 0 0 1-2.2-2.1l7.3-7.3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+function SmileIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <circle cx="9" cy="10" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="15" cy="10" r="1.2" fill="currentColor" stroke="none" />
+      <path d="M8.5 14.5c1 1.3 2.2 2 3.5 2s2.5-.7 3.5-2" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function SearchIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <circle cx="11" cy="11" r="7" />
+      <path d="M20 20l-3.5-3.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function MenuIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <circle cx="5" cy="12" r="1.8" />
+      <circle cx="12" cy="12" r="1.8" />
+      <circle cx="19" cy="12" r="1.8" />
+    </svg>
+  )
+}
+
+function ComposerAction({ icon, label }: { icon: ReactNode; label: string }) {
+  return (
+    <button className={styles.composerAction} type="button" aria-label={label} title={label}>
+      {icon}
+    </button>
+  )
+}
+
+export function ChatView({ chat, messages, onSend, onBack }: ChatViewProps) {
   const [draft, setDraft] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
 
@@ -26,42 +91,60 @@ export function ChatView({ chat, messages, onSend }: ChatViewProps) {
     setDraft('')
   }
 
+  const handleCopyCode = (code: string) => {
+    void navigator.clipboard?.writeText(code)
+  }
+
   if (!chat) {
-    return <section className={styles.placeholder}>Выберите чат для общения</section>
+    return <section className={styles.placeholder}>Выберите чат, чтобы открыть переписку</section>
   }
 
   return (
     <section className={styles.view}>
       <header className={styles.header}>
-        <h2 className={styles.title}>{chat.name}</h2>
+        <ButtonItem
+          icon="←"
+          label="Назад"
+          shape="circle"
+          size="sm"
+          className={styles.back}
+          onClick={onBack}
+        />
+        <Avatar name={chat.name} kind={chat.avatar} src={chat.avatarUrl} size="sm" />
+        <div className={styles.headerBody}>
+          <span className={styles.headerName}>
+            {chat.name}
+            {chat.verified && <VerifiedBadge size="md" />}
+          </span>
+          {chat.subtitle && <span className={styles.headerSubtitle}>{chat.subtitle}</span>}
+        </div>
+        <ButtonItem icon={<SearchIcon />} label="Поиск" shape="circle" size="sm" />
+        <ButtonItem icon={<MenuIcon />} label="Меню" shape="circle" size="sm" />
       </header>
 
       <div className={styles.messages}>
         {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`${styles.message} ${message.direction === 'out' ? styles.outgoing : styles.incoming}`}
-          >
-            {message.text}
-            <span className={styles.time}>{message.timestamp}</span>
-          </div>
+          <MessageBubble key={message.id} message={message} onCopyCode={handleCopyCode} />
         ))}
         <div ref={bottomRef} />
       </div>
 
       <form className={styles.composer} onSubmit={handleSubmit}>
+        <ComposerAction icon={<StickerIcon />} label="Стикеры" />
+        <ComposerAction icon={<ClipIcon />} label="Прикрепить файл" />
         <input
           className={styles.input}
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
-          placeholder="Введите сообщение"
+          placeholder="Сообщение"
           aria-label="Сообщение"
         />
+        <ComposerAction icon={<SmileIcon />} label="Эмодзи" />
         <ButtonItem
-          icon="➤"
+          icon="↑"
           label="Отправить"
           type="submit"
-          shape="rounded"
+          shape="circle"
           variant="primary"
           disabled={!draft.trim()}
         />

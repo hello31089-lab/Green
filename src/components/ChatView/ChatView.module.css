@@ -1,86 +1,128 @@
 .view {
   display: flex;
-  flex-direction: column;
   flex: 1;
-  height: 100%;
+  flex-direction: column;
   min-width: 0;
+  height: 100%;
+  background: var(--color-bg-chat);
 }
 
 .placeholder {
   display: grid;
   flex: 1;
   place-items: center;
-  color: var(--color-muted);
+  color: var(--color-text-secondary);
+  background: var(--color-bg-chat);
 }
 
 .header {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 60px;
+  padding: 0 12px;
+  background: var(--color-bg);
+  box-shadow: var(--shadow-header);
 }
 
-.title {
-  margin: 0;
+.headerBody {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.headerName {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 16px;
   font-weight: 600;
   color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.headerSubtitle {
+  font-size: var(--font-size-meta);
+  color: var(--color-text-secondary);
+}
+
+.back {
+  display: none;
 }
 
 .messages {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: var(--spacing-unit);
-  padding: 16px;
+  gap: 10px;
+  padding: 16px 40px;
   overflow-y: auto;
-}
-
-.message {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  max-width: 70%;
-  padding: 8px 12px;
-  font-size: 14px;
-  border-radius: var(--radius-md);
-}
-
-.outgoing {
-  align-self: flex-end;
-  color: var(--color-primary-contrast);
-  background: var(--color-primary);
-  border-bottom-right-radius: 0;
-}
-
-.incoming {
-  align-self: flex-start;
-  background: var(--color-surface);
-  border-bottom-left-radius: 0;
-}
-
-.time {
-  font-size: 11px;
-  opacity: 0.7;
+  background-color: var(--color-bg-chat);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Cg fill='%232B7DE9' fill-opacity='0.09'%3E%3Cpath d='M32 38l4 10 10 4-10 4-4 10-4-10-10-4 10-4z'/%3E%3Ccircle cx='176' cy='52' r='13'/%3E%3Cellipse cx='176' cy='52' rx='24' ry='7' fill='none' stroke='%232B7DE9' stroke-opacity='0.11'/%3E%3Cpath d='M74 148c9-15 24-23 24-23s-2 19-11 25-13 7-13 7z'/%3E%3Crect x='152' y='168' width='16' height='12' rx='3'/%3E%3Crect x='126' y='171' width='20' height='6' rx='2'/%3E%3Crect x='174' y='171' width='20' height='6' rx='2'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 .composer {
   display: flex;
-  gap: var(--spacing-unit);
-  padding: 12px 16px;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  background: var(--color-bg);
   border-top: 1px solid var(--color-border);
 }
 
 .input {
   flex: 1;
-  padding: 10px 12px;
+  min-width: 0;
+  height: 36px;
+  padding: 0 8px;
   font-family: inherit;
-  font-size: 14px;
+  font-size: var(--font-size-message);
   color: var(--color-text);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  background: transparent;
+  border: none;
   outline: none;
 }
 
-.input:focus {
-  border-color: var(--color-primary);
+.input::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.composerAction {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.composerAction:hover {
+  background: var(--color-hover);
+}
+
+.composerAction svg {
+  width: 22px;
+  height: 22px;
+}
+
+.composerAction:first-child svg {
+  color: var(--color-primary);
+}
+
+@media (max-width: 900px) {
+  .back {
+    display: grid;
+  }
+
+  .messages {
+    padding: 16px 12px;
+  }
 }
