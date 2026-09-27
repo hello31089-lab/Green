@@ -27,12 +27,6 @@ export interface Chat {
   unreadCount: number
 }
 
-export interface ChatUser {
-  id: string
-  name: string
-  avatarUrl?: string
-}
-
 export interface ChatState {
   chats: Chat[]
   messages: Record<string, ChatMessage[]>

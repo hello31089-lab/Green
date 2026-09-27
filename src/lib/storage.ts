@@ -38,11 +38,3 @@ export function saveChatState(state: ChatState): boolean {
     return false
   }
 }
-
-export function clearChatState(): void {
-  try {
-    localStorage.removeItem(STORAGE_KEY)
-  } catch {
-    return
-  }
-}

@@ -1,7 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { ChatView } from '../../components/ChatView'
 import { Sidebar } from '../../components/Sidebar'
-import { ButtonItem } from '../../components/ButtonItem'
 import { useChats } from '../../hooks/useChats'
 import styles from './Chat.module.css'
 
@@ -28,13 +27,9 @@ export function Chat() {
           <p className={styles.notFoundText}>
             Чат с адресом <code>{chatId}</code> не найден в localStorage
           </p>
-          <ButtonItem
-            icon="←"
-            label="Вернуться к чатам"
-            shape="rounded"
-            variant="surface"
-            onClick={() => navigate('/')}
-          />
+          <button className={styles.backLink} type="button" onClick={() => navigate('/')}>
+            ← Вернуться к чатам
+          </button>
         </div>
       </div>
     )

@@ -1,18 +1,15 @@
-.page {
-  display: flex;
-  height: 100%;
-}
-
 .placeholder {
   display: grid;
   flex: 1;
   place-content: center;
   gap: 4px;
   text-align: center;
-  color: var(--color-muted);
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-chat);
+  background-image: var(--pattern-chat);
 }
 
 .hint {
-  font-size: 14px;
-  opacity: 0.7;
+  font-size: var(--font-size-preview);
+  opacity: 0.75;
 }
