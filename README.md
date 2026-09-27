@@ -43,10 +43,10 @@ npm run format
 `x-green-token` и телом `{ method, payload }`. Функция держит белый список
 методов, собирает URL GREEN-API и проксирует ответ как есть.
 
-| Задача | Метод GREEN-API |
-| --- | --- |
-| Проверка инстанса | `GetStateInstance` |
-| Отправка текста | `SendMessage` |
+| Задача               | Метод GREEN-API                              |
+| -------------------- | -------------------------------------------- |
+| Проверка инстанса    | `GetStateInstance`                           |
+| Отправка текста      | `SendMessage`                                |
 | Входящие уведомления | `ReceiveNotification` + `DeleteNotification` |
 
 Для приёма сообщений в настройках инстанса `webhookUrl` должен быть пустым,
