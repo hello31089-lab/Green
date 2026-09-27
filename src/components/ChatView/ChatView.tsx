@@ -1,15 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import type { Chat, ChatMessage } from '../../types/chat'
+import type { LoadStatus } from '../../providers/chatsContext'
+import { formatPhone, typeLabel } from '../../api/mappers'
 import { Avatar } from '../Avatar'
 import { ButtonItem } from '../ButtonItem'
 import { MessageBubble } from '../MessageBubble'
-import { VerifiedBadge } from '../VerifiedBadge'
 import styles from './ChatView.module.css'
 
 export interface ChatViewProps {
   chat: Chat
   messages: ChatMessage[]
+  historyStatus: LoadStatus
+  historyError: string | null
   onSend: (text: string) => void
   onBack?: () => void
 }
@@ -75,9 +78,17 @@ function ComposerAction({ icon, label }: { icon: ReactNode; label: string }) {
   )
 }
 
-export function ChatView({ chat, messages, onSend, onBack }: ChatViewProps) {
+export function ChatView({
+  chat,
+  messages,
+  historyStatus,
+  historyError,
+  onSend,
+  onBack,
+}: ChatViewProps) {
   const [draft, setDraft] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
+  const subtitle = formatPhone(chat.phoneNumber) || typeLabel(chat.type)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -97,20 +108,27 @@ export function ChatView({ chat, messages, onSend, onBack }: ChatViewProps) {
         <span className={styles.back}>
           <ButtonItem icon="←" label="Назад" shape="circle" size="sm" onClick={onBack} />
         </span>
-        <Avatar name={chat.name} kind={chat.avatar} src={chat.avatarUrl} size="sm" />
+        <Avatar name={chat.name} size="sm" />
         <div className={styles.headerBody}>
-          <span className={styles.headerName}>
-            {chat.name}
-            {chat.verified && <VerifiedBadge size="md" />}
-          </span>
-          {chat.subtitle && <span className={styles.headerSubtitle}>{chat.subtitle}</span>}
+          <span className={styles.headerName}>{chat.name}</span>
+          <span className={styles.headerSubtitle}>{subtitle}</span>
         </div>
         <ButtonItem icon={<SearchIcon />} label="Поиск" shape="circle" size="sm" />
         <ButtonItem icon={<MenuIcon />} label="Меню" shape="circle" size="sm" />
       </header>
 
       <div className={styles.messages}>
-        {messages.length === 0 && <p className={styles.empty}>Начните общение</p>}
+        {historyError && (
+          <p className={styles.historyError} role="alert">
+            {historyError}
+          </p>
+        )}
+        {!historyError && historyStatus === 'loading' && (
+          <p className={styles.empty}>Загружаем переписку…</p>
+        )}
+        {!historyError && historyStatus !== 'loading' && messages.length === 0 && (
+          <p className={styles.empty}>Начните общение</p>
+        )}
         {messages.map((message) => (
           <MessageBubble key={message.id} message={message} />
         ))}

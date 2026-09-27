@@ -39,3 +39,15 @@
 .outgoing .time {
   color: rgba(255, 255, 255, 0.75);
 }
+
+.failed {
+  opacity: 0.7;
+}
+
+.status {
+  margin-left: 4px;
+}
+
+.outgoing .status {
+  color: rgba(255, 255, 255, 0.75);
+}

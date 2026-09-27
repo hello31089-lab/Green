@@ -31,7 +31,7 @@ const FIELDS: FieldSpec[] = [
   {
     name: 'apiTokenInstance',
     label: 'apiTokenInstance',
-    placeholder: 'd75b3a66374942c5b3c019c698abc2067e1',
+    placeholder: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
     hint: 'Токен инстанса из того же личного кабинета',
     inputMode: 'text',
     autoComplete: 'current-password',
@@ -152,7 +152,8 @@ export function Auth({ redirectTo = '/' }: AuthProps) {
         </form>
 
         <p className={styles.footer}>
-          Учётные данные не покидают браузер и сохраняются только в localStorage этого устройства.
+          Учётные данные хранятся только в localStorage этого устройства. В GREEN-API они уходят
+          отдельными заголовками через собственный прокси приложения, в адрес строки не попадают.
           Заберите их в{' '}
           <a href="https://console.green-api.com" target="_blank" rel="noreferrer">
             личном кабинете GREEN-API

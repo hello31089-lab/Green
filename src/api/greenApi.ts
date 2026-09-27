@@ -1,7 +1,11 @@
 import type {
   CheckAccountResponse,
+  DeleteNotificationResponse,
+  GreenApiChat,
   GreenApiCredentials,
   GreenApiErrorPayload,
+  GreenApiHistoryMessage,
+  GreenApiNotification,
   SendMessageResponse,
   StateInstanceResponse,
 } from '../types/greenApi'
@@ -24,6 +28,9 @@ const PROXY_URL = '/api/green-api'
 const ID_INSTANCE_HEADER = 'x-green-id-instance'
 const TOKEN_HEADER = 'x-green-token'
 
+/** Таймаут ожидания уведомления в GREEN-API: от 5 до 60 секунд. */
+export const RECEIVE_TIMEOUT_SECONDS = 20
+
 export class GreenApiError extends Error {
   readonly status: number
   readonly payload: GreenApiErrorPayload | null
@@ -41,6 +48,9 @@ function readErrorMessage(payload: unknown, fallback: string): string {
   const record = payload as GreenApiErrorPayload
   if (typeof record.message === 'string' && record.message) return record.message
   if (typeof record.error === 'string' && record.error) return record.error
+  if (typeof record.reason === 'string' && record.reason) return record.reason
+  if (record.invokeStatus?.description) return record.invokeStatus.description
+  if (record.correspondentsStatus?.description) return record.correspondentsStatus.description
   return fallback
 }
 
@@ -106,12 +116,32 @@ export function getStateInstance(
   return call<StateInstanceResponse>('getStateInstance', credentials, {}, signal)
 }
 
+export function getChats(
+  credentials: GreenApiCredentials,
+  signal?: AbortSignal,
+): Promise<GreenApiChat[] | null> {
+  return call<GreenApiChat[]>('getChats', credentials, {}, signal)
+}
+
+/**
+ * Проверяет, есть ли на номере аккаунт MAX, и отдаёт `chatId` для отправки.
+ * Каждый вызов расходует квоту тарифа, поэтому результат стоит кэшировать.
+ */
 export function checkAccount(
   credentials: GreenApiCredentials,
-  id: string,
+  phoneNumber: number,
   signal?: AbortSignal,
 ): Promise<CheckAccountResponse | null> {
-  return call<CheckAccountResponse>('checkAccount', credentials, { id }, signal)
+  return call<CheckAccountResponse>('checkAccount', credentials, { phoneNumber }, signal)
+}
+
+export function getChatHistory(
+  credentials: GreenApiCredentials,
+  chatId: string,
+  count = 100,
+  signal?: AbortSignal,
+): Promise<GreenApiHistoryMessage[] | null> {
+  return call<GreenApiHistoryMessage[]>('getChatHistory', credentials, { chatId, count }, signal)
 }
 
 export function sendMessage(
@@ -123,14 +153,31 @@ export function sendMessage(
   return call<SendMessageResponse>('sendMessage', credentials, { chatId, message }, signal)
 }
 
-export function receiveNotification(credentials: GreenApiCredentials, signal?: AbortSignal) {
-  return call<Record<string, unknown>>('receiveNotification', credentials, {}, signal)
+/**
+ * Забирает одно уведомление из очереди. Возвращает `null`, если за
+ * `receiveTimeout` секунд очередь осталась пустой — это штатная ситуация,
+ * а не ошибка.
+ */
+export async function receiveNotification(
+  credentials: GreenApiCredentials,
+  signal?: AbortSignal,
+): Promise<GreenApiNotification | null> {
+  const result = await call<GreenApiNotification>(
+    'receiveNotification',
+    credentials,
+    { receiveTimeout: RECEIVE_TIMEOUT_SECONDS },
+    signal,
+  )
+
+  if (!result || typeof result !== 'object' || !result.body) return null
+  return result
 }
 
+/** Подтверждает обработку уведомления, иначе оно вернётся в очередь. */
 export function deleteNotification(
   credentials: GreenApiCredentials,
-  receiptId: string,
+  receiptId: number,
   signal?: AbortSignal,
-) {
-  return call<null>('deleteNotification', credentials, { receiptId }, signal)
+): Promise<DeleteNotificationResponse | null> {
+  return call<DeleteNotificationResponse>('deleteNotification', credentials, { receiptId }, signal)
 }

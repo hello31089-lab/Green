@@ -1,6 +1,7 @@
+import { formatPhone, typeLabel } from '../../api/mappers'
 import type { Chat } from '../../types/chat'
+import { formatChatTime } from '../../lib/datetime'
 import { Avatar } from '../Avatar'
-import { VerifiedBadge } from '../VerifiedBadge'
 import styles from './ChatItem.module.css'
 
 export interface ChatItemProps {
@@ -19,6 +20,10 @@ export function ChatItem({ chat, isActive = false, onSelect }: ChatItemProps) {
     .filter(Boolean)
     .join(' ')
 
+  // `GetChats` не отдаёт превью: до первого сообщения показываем номер,
+  // а если он скрыт — тип чата.
+  const preview = chat.lastMessage || formatPhone(chat.phoneNumber) || typeLabel(chat.type)
+
   return (
     <button
       type="button"
@@ -26,18 +31,19 @@ export function ChatItem({ chat, isActive = false, onSelect }: ChatItemProps) {
       onClick={handleClick}
       aria-current={isActive ? 'true' : undefined}
     >
-      <Avatar name={chat.name} kind={chat.avatar} src={chat.avatarUrl} />
+      <Avatar name={chat.name} />
 
       <span className={styles.body}>
         <span className={styles.nameRow}>
           <span className={styles.name}>{chat.name}</span>
-          {chat.verified && <VerifiedBadge />}
         </span>
-        <span className={styles.preview}>{chat.lastMessage}</span>
+        <span className={styles.preview}>{preview}</span>
       </span>
 
       <span className={styles.meta}>
-        <span className={styles.time}>{chat.lastMessageAt}</span>
+        {chat.lastMessageAt !== undefined && (
+          <span className={styles.time}>{formatChatTime(new Date(chat.lastMessageAt * 1000))}</span>
+        )}
         {chat.unreadCount > 0 && <span className={styles.badge}>{chat.unreadCount}</span>}
       </span>
     </button>

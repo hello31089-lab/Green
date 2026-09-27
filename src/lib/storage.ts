@@ -1,37 +1,77 @@
-import type { ChatState } from '../types/chat'
-import { mockChatState } from '../mock/chats'
+import type { Chat } from '../types/chat'
 import { readItem, writeItem } from './safeStorage'
 
-const STORAGE_KEY = 'chats'
-const VERSION = 2
+const CHATS_KEY = 'green-api-chats'
+const CONTACTS_KEY = 'green-api-contacts'
+const VERSION = 3
 
-interface StoredChatState {
+interface StoredChats {
   version: number
-  state: ChatState
+  chats: Chat[]
 }
 
-function isChatState(value: unknown): value is ChatState {
+/**
+ * `GetChats` не отдаёт ни последнего сообщения, ни счётчика непрочитанных,
+ * поэтому список чатов храним локально и дополняем ответом API. Сообщения
+ * не сохраняем: их источник истины — `GetChatHistory`.
+ */
+
+function isChat(value: unknown): value is Chat {
   if (typeof value !== 'object' || value === null) return false
-  const state = value as Partial<ChatState>
-  return Array.isArray(state.chats) && typeof state.messages === 'object' && state.messages !== null
+  const chat = value as Partial<Chat>
+  return typeof chat.id === 'string' && typeof chat.name === 'string'
 }
 
-export function loadChatState(): ChatState {
-  const raw = readItem(STORAGE_KEY)
-  if (!raw) return structuredClone(mockChatState)
+function parseChats(raw: string | null): Chat[] {
+  if (!raw) return []
 
   try {
-    const parsed = JSON.parse(raw) as Partial<StoredChatState>
-    if (parsed.version !== VERSION || !isChatState(parsed.state)) {
-      return structuredClone(mockChatState)
-    }
-    return parsed.state
+    const parsed = JSON.parse(raw) as Partial<StoredChats>
+    if (parsed.version !== VERSION || !Array.isArray(parsed.chats)) return []
+    return parsed.chats
+      .filter(isChat)
+      .map((chat) => ({ ...chat, unreadCount: chat.unreadCount ?? 0 }))
   } catch {
-    return structuredClone(mockChatState)
+    return []
   }
 }
 
-export function saveChatState(state: ChatState): boolean {
-  const payload: StoredChatState = { version: VERSION, state }
-  return writeItem(STORAGE_KEY, JSON.stringify(payload))
+export function loadChats(): Chat[] {
+  return parseChats(readItem(CHATS_KEY))
+}
+
+export function saveChats(chats: Chat[]): boolean {
+  const payload: StoredChats = { version: VERSION, chats }
+  return writeItem(CHATS_KEY, JSON.stringify(payload))
+}
+
+/**
+ * Кэш «номер → chatId». `CheckAccount` расходует квоту тарифа (100 проверок
+ * в месяц на Developer), а `chatId` между сессиями не меняется, поэтому
+ * повторно проверять уже известные номера не нужно.
+ */
+export function loadContacts(): Record<string, string> {
+  const raw = readItem(CONTACTS_KEY)
+  if (!raw) return {}
+
+  try {
+    const parsed: unknown = JSON.parse(raw)
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return {}
+
+    const result: Record<string, string> = {}
+    for (const [phone, chatId] of Object.entries(parsed)) {
+      if (typeof chatId === 'string' && chatId) result[phone] = chatId
+    }
+    return result
+  } catch {
+    return {}
+  }
+}
+
+export function saveContact(phone: string, chatId: string): void {
+  writeItem(CONTACTS_KEY, JSON.stringify({ ...loadContacts(), [phone]: chatId }))
+}
+
+export function findContact(phone: string): string | null {
+  return loadContacts()[phone] ?? null
 }

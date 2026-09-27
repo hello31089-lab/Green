@@ -9,7 +9,7 @@ import {
   validateCredentials,
 } from '../lib/credentials'
 import type { CredentialsErrors } from '../lib/credentials'
-import type { GreenApiCredentials, StateInstanceResponse } from '../types/greenApi'
+import type { GreenApiCredentials, InstanceState, StateInstanceResponse } from '../types/greenApi'
 import { CredentialsContext } from './CredentialsContext'
 import type { CredentialsContextValue, CredentialsStatus } from './CredentialsContext'
 
@@ -17,22 +17,39 @@ export interface CredentialsProviderProps {
   children: ReactNode
 }
 
-const AUTHORIZED = 'authorized'
+const AUTHORIZED: InstanceState = 'authorized'
 
-const KNOWN_STATUSES = new Set([400, 401, 403, 404, 429, 466, 502])
+const KNOWN_STATUSES = new Set([400, 401, 403, 404, 429, 466, 469, 502])
 
 /** Ответ пришёл не от нашего прокси — значит не смонтирован, а не неверные данные. */
 const PROXY_MISSING_STATUSES = new Set([404, 405])
 
 type VerifyResult = { ok: true } | { ok: false; message: string }
 
+/**
+ * Ошибки `GetStateInstance` для неавторизованного инстанса приходят
+ * с кодом 200 и заполненным `stateInstance`, поэтому состояние важнее кода.
+ */
+const STATE_MESSAGES: Record<InstanceState, string> = {
+  notAuthorized: 'Инстанс не авторизован в MAX. Отсканируйте QR-код в личном кабинете GREEN-API.',
+  starting: 'Инстанс запускается. Это занимает до 5 минут, попробуйте позже.',
+  blocked:
+    'Аккаунт MAX заблокирован. После перезапуска инстанса он вернётся в статус «не авторизован».',
+  suspended:
+    'На аккаунте временные ограничения: отправка возможна только номерам, сохранившим ваш номер в контактах.',
+  pendingPassword: 'Для завершения авторизации нужен пароль двухфакторной аутентификации.',
+  authorized: '',
+}
+
+function describeState(state: InstanceState): string | null {
+  return STATE_MESSAGES[state] || null
+}
+
 /** Превращает ответ GREEN-API в понятное пользователю сообщение. */
-function describeFailure(status: number, instanceState: string | null): string {
-  if (instanceState === 'unauthorized') {
-    return 'Инстанс не авторизован в мессенджере. Отсканируйте QR-код в личном кабинете GREEN-API.'
-  }
-  if (instanceState === 'qr') {
-    return 'Инстанс ждёт авторизацию по QR-коду. Отсканируйте его в личном кабинете GREEN-API.'
+function describeFailure(status: number, instanceState: InstanceState | null): string {
+  if (instanceState) {
+    const message = describeState(instanceState)
+    if (message) return message
   }
 
   switch (status) {
@@ -47,6 +64,8 @@ function describeFailure(status: number, instanceState: string | null): string {
       return 'Превышен лимит запросов. Подождите минуту и повторите попытку.'
     case 466:
       return 'Исчерпан лимит тарифа MAX Developer.'
+    case 469:
+      return 'Слишком много проверок номеров подряд. Сделайте паузу примерно на 2 часа.'
     case 502:
       return 'GREEN-API недоступен. Попробуйте позже.'
     default:
@@ -56,7 +75,7 @@ function describeFailure(status: number, instanceState: string | null): string {
   }
 }
 
-function toMessage(thrown: unknown, instanceState: string | null): string {
+function toMessage(thrown: unknown, instanceState: InstanceState | null): string {
   if (thrown instanceof GreenApiError) {
     // Сообщение прокси важнее стандартной расшифровки: оно точнее
     // описывает, что именно сломалось на его стороне.

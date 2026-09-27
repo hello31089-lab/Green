@@ -8,6 +8,34 @@
 .empty {
   padding: 24px 12px;
   font-size: var(--font-size-preview);
+  line-height: 1.5;
   color: var(--color-text-secondary);
   text-align: center;
+}
+
+.error {
+  padding: 16px 12px;
+  font-size: var(--font-size-preview);
+  line-height: 1.5;
+  color: #d13b3b;
+  text-align: center;
+}
+
+.retry {
+  display: block;
+  margin: 10px auto 0;
+  padding: 8px 16px;
+  font-family: inherit;
+  font-size: var(--font-size-preview);
+  font-weight: 600;
+  color: var(--color-primary);
+  background: none;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.retry:hover {
+  color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
 }

@@ -7,11 +7,13 @@ const TOKEN_PATTERN = /^[A-Za-z0-9]{16,}$/
 
 /**
  * Белый список методов GREEN-API.
- * `http` — GET или POST, `query` — какие поля payload уходят в query string,
+ * `http` — HTTP-метод, `path` — поля, которые подставляются в путь URL,
+ * `query` — какие поля payload уходят в query string,
  * `body` — поля, которые уходят в JSON-тело.
  */
 interface MethodSpec {
-  http: 'GET' | 'POST'
+  http: 'GET' | 'POST' | 'DELETE'
+  path?: string[]
   query?: string[]
   body?: string[]
 }
@@ -21,16 +23,16 @@ const METHODS: Record<string, MethodSpec> = {
   getAccountSettings: { http: 'GET' },
 
   sendMessage: { http: 'POST', body: ['chatId', 'message', 'typingTime', 'quotedMessageId'] },
-  receiveNotification: { http: 'GET' },
-  deleteNotification: { http: 'POST', body: ['receiptId'] },
+  receiveNotification: { http: 'GET', query: ['receiveTimeout'] },
+  deleteNotification: { http: 'DELETE', path: ['receiptId'] },
 
-  checkAccount: { http: 'GET', query: ['id'] },
+  checkAccount: { http: 'POST', body: ['phoneNumber', 'force'] },
   setSettings: {
     http: 'POST',
     body: ['webhookUrl', 'incomingWebhook', 'outgoingWebhook', 'stateWebhook'],
   },
   getChats: { http: 'GET' },
-  getChatHistory: { http: 'GET', query: ['chatId', 'limit', 'offset'] },
+  getChatHistory: { http: 'POST', body: ['chatId', 'count'] },
 }
 
 export interface ProxyRequest {
@@ -69,7 +71,16 @@ function buildUpstreamUrl(
   token: string,
   payload: Record<string, unknown>,
 ): string {
-  const url = new URL(`${API_URL}/waInstance${idInstance}/${method}/${token}`)
+  // `DeleteNotification` передаёт `receiptId` в пути, а не в теле.
+  const suffix = (spec.path ?? [])
+    .map((field) => payload[field])
+    .filter((value): value is string | number => value !== undefined && value !== null)
+    .map((value) => encodeURIComponent(String(value)))
+    .join('/')
+
+  const url = new URL(
+    `${API_URL}/waInstance${idInstance}/${method}/${token}${suffix ? `/${suffix}` : ''}`,
+  )
 
   for (const field of spec.query ?? []) {
     const value = payload[field]

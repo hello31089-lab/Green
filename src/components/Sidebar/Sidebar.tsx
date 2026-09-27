@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { Chat } from '../../types/chat'
+import type { LoadStatus } from '../../providers/chatsContext'
 import { ButtonItem } from '../ButtonItem'
 import { ChatList } from '../ChatList'
 import { SearchBar } from '../SearchBar'
@@ -10,18 +11,33 @@ import styles from './Sidebar.module.css'
 export interface SidebarProps {
   chats: Chat[]
   activeChatId?: string
+  status: LoadStatus
+  error: string | null
   onSelectChat: (chatId: string) => void
   onAddChat: () => void
+  onRetry: () => void
 }
 
-export function Sidebar({ chats, activeChatId, onSelectChat, onAddChat }: SidebarProps) {
+export function Sidebar({
+  chats,
+  activeChatId,
+  status,
+  error,
+  onSelectChat,
+  onAddChat,
+  onRetry,
+}: SidebarProps) {
   const [query, setQuery] = useState('')
   const { theme, toggleTheme } = useTheme()
 
   const filteredChats = useMemo(() => {
     const normalized = query.trim().toLowerCase()
     if (!normalized) return chats
-    return chats.filter((chat) => chat.name.toLowerCase().includes(normalized))
+    return chats.filter(
+      (chat) =>
+        chat.name.toLowerCase().includes(normalized) ||
+        (chat.phoneNumber ? String(chat.phoneNumber).includes(normalized) : false),
+    )
   }, [chats, query])
 
   const isDark = theme === 'dark'
@@ -48,7 +64,14 @@ export function Sidebar({ chats, activeChatId, onSelectChat, onAddChat }: Sideba
         />
       </header>
       <SearchBar value={query} onChange={setQuery} placeholder="Найти" />
-      <ChatList chats={filteredChats} activeChatId={activeChatId} onSelect={onSelectChat} />
+      <ChatList
+        chats={filteredChats}
+        activeChatId={activeChatId}
+        status={status}
+        error={error}
+        onSelect={onSelectChat}
+        onRetry={onRetry}
+      />
     </aside>
   )
 }

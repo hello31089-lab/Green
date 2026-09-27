@@ -18,24 +18,7 @@
   height: var(--avatar-size-sm);
 }
 
-.image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
 .letter {
   font-size: 19px;
   font-weight: 600;
-}
-
-.logo {
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -1px;
-}
-
-.glyph {
-  width: 55%;
-  height: 55%;
 }
