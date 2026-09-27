@@ -1,13 +1,13 @@
 .list {
   display: flex;
-  flex-direction: column;
   flex: 1;
+  flex-direction: column;
   overflow-y: auto;
 }
 
 .empty {
   padding: 24px 12px;
-  font-size: 14px;
-  color: var(--color-muted);
+  font-size: var(--font-size-preview);
+  color: var(--color-text-secondary);
   text-align: center;
 }

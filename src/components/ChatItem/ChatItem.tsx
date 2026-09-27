@@ -1,4 +1,6 @@
 import type { Chat } from '../../types/chat'
+import { Avatar } from '../Avatar'
+import { VerifiedBadge } from '../VerifiedBadge'
 import styles from './ChatItem.module.css'
 
 export interface ChatItemProps {
@@ -9,21 +11,25 @@ export interface ChatItemProps {
 
 export function ChatItem({ chat, isActive = false, onSelect }: ChatItemProps) {
   const handleClick = () => onSelect(chat.id)
+  const classes = [styles.item, isActive ? styles.active : ''].filter(Boolean).join(' ')
 
   return (
     <button
       type="button"
-      className={`${styles.item} ${isActive ? styles.active : ''}`}
+      className={classes}
       onClick={handleClick}
-      aria-current={isActive}
+      aria-current={isActive ? 'true' : undefined}
     >
-      <span className={styles.avatar}>
-        {chat.avatarUrl ? <img src={chat.avatarUrl} alt="" /> : chat.name.charAt(0)}
-      </span>
+      <Avatar name={chat.name} kind={chat.avatar} src={chat.avatarUrl} />
+
       <span className={styles.body}>
-        <span className={styles.name}>{chat.name}</span>
-        <span className={styles.lastMessage}>{chat.lastMessage}</span>
+        <span className={styles.nameRow}>
+          <span className={styles.name}>{chat.name}</span>
+          {chat.verified && <VerifiedBadge />}
+        </span>
+        <span className={styles.preview}>{chat.lastMessage}</span>
       </span>
+
       <span className={styles.meta}>
         <span className={styles.time}>{chat.lastMessageAt}</span>
         {chat.unreadCount > 0 && <span className={styles.badge}>{chat.unreadCount}</span>}

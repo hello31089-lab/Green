@@ -37,9 +37,16 @@ export function Sidebar({ chats, activeChatId, onSelectChat, onAddChat }: Sideba
           size="sm"
           onClick={toggleTheme}
         />
-        <ButtonItem icon="+" label="Добавить чат" shape="rounded" size="sm" onClick={onAddChat} />
+        <ButtonItem
+          icon="+"
+          label="Добавить чат"
+          shape="circle"
+          size="sm"
+          variant="primary"
+          onClick={onAddChat}
+        />
       </header>
-      <SearchBar value={query} onChange={setQuery} placeholder="Найти чат" />
+      <SearchBar value={query} onChange={setQuery} placeholder="Найти" />
       <ChatList chats={filteredChats} activeChatId={activeChatId} onSelect={onSelectChat} />
     </aside>
   )
