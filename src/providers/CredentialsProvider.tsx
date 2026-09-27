@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+﻿import { useCallback, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { GreenApiError, getStateInstance } from '../api/greenApi'
 import {
@@ -21,8 +21,7 @@ const AUTHORIZED = 'authorized'
 
 const KNOWN_STATUSES = new Set([400, 401, 403, 404, 429, 466, 502])
 
-type VerifyResult =
-  { ok: true; state: string } | { ok: false; state: string | null; message: string }
+type VerifyResult = { ok: true } | { ok: false; message: string }
 
 /** Превращает ответ GREEN-API в понятное пользователю сообщение. */
 function describeFailure(status: number, instanceState: string | null): string {
@@ -71,7 +70,6 @@ export function CredentialsProvider({ children }: CredentialsProviderProps) {
 
   const [credentials, setCredentials] = useState<GreenApiCredentials | null>(stored)
   const [status, setStatus] = useState<CredentialsStatus>(stored ? 'checking' : 'anonymous')
-  const [instanceState, setInstanceState] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const verify = useCallback(async (values: GreenApiCredentials): Promise<VerifyResult> => {
@@ -80,19 +78,18 @@ export function CredentialsProvider({ children }: CredentialsProviderProps) {
     try {
       response = await getStateInstance(values)
     } catch (thrown) {
-      return { ok: false, state: null, message: toMessage(thrown, null) }
+      return { ok: false, message: toMessage(thrown, null) }
     }
 
     const state = response?.stateInstance ?? null
 
     if (state !== AUTHORIZED) {
-      return { ok: false, state, message: describeFailure(200, state) }
+      return { ok: false, message: describeFailure(200, state) }
     }
 
-    return { ok: true, state }
+    return { ok: true }
   }, [])
 
-  // Если учётные данные были сохранены ранее, подтверждаем их перед входом.
   useEffect(() => {
     if (!stored) return
 
@@ -103,12 +100,10 @@ export function CredentialsProvider({ children }: CredentialsProviderProps) {
       if (cancelled) return
 
       if (result.ok) {
-        setInstanceState(result.state)
         setStatus('authorized')
         return
       }
 
-      setInstanceState(result.state)
       setError(result.message)
       setStatus('anonymous')
     })()
@@ -130,7 +125,6 @@ export function CredentialsProvider({ children }: CredentialsProviderProps) {
       const result = await verify(normalized)
 
       if (!result.ok) {
-        setInstanceState(result.state)
         setStatus('anonymous')
         setError(result.message)
         return null
@@ -138,7 +132,6 @@ export function CredentialsProvider({ children }: CredentialsProviderProps) {
 
       saveCredentials(normalized)
       setCredentials(normalized)
-      setInstanceState(result.state)
       setStatus('authorized')
       return null
     },
@@ -148,7 +141,6 @@ export function CredentialsProvider({ children }: CredentialsProviderProps) {
   const signOut = useCallback(() => {
     clearCredentials()
     setCredentials(null)
-    setInstanceState(null)
     setError(null)
     setStatus('anonymous')
   }, [])
@@ -156,7 +148,6 @@ export function CredentialsProvider({ children }: CredentialsProviderProps) {
   const value: CredentialsContextValue = {
     credentials,
     status,
-    instanceState,
     error,
     authorize,
     signOut,

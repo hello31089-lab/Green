@@ -11,7 +11,7 @@ export interface SidebarProps {
   chats: Chat[]
   activeChatId?: string
   onSelectChat: (chatId: string) => void
-  onAddChat?: () => void
+  onAddChat: () => void
 }
 
 export function Sidebar({ chats, activeChatId, onSelectChat, onAddChat }: SidebarProps) {

@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { Auth } from '../pages/Auth'
+import { ErrorBoundary } from '../components/ErrorBoundary'
 import { useCredentials } from '../hooks/useCredentials'
 import styles from './AppRoutes.module.css'
 
@@ -25,9 +26,11 @@ function RequireCredentials() {
   }
 
   return (
-    <Suspense fallback={<Splash label="Загружаем чат…" />}>
-      <AuthenticatedRoutes />
-    </Suspense>
+    <ErrorBoundary title="Чат не загрузился">
+      <Suspense fallback={<Splash label="Загружаем чат…" />}>
+        <AuthenticatedRoutes />
+      </Suspense>
+    </ErrorBoundary>
   )
 }
 

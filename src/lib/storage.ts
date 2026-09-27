@@ -1,5 +1,6 @@
 import type { ChatState } from '../types/chat'
 import { mockChatState } from '../mock/chats'
+import { readItem, writeItem } from './safeStorage'
 
 const STORAGE_KEY = 'chats'
 const VERSION = 2
@@ -16,9 +17,10 @@ function isChatState(value: unknown): value is ChatState {
 }
 
 export function loadChatState(): ChatState {
+  const raw = readItem(STORAGE_KEY)
+  if (!raw) return structuredClone(mockChatState)
+
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return structuredClone(mockChatState)
     const parsed = JSON.parse(raw) as Partial<StoredChatState>
     if (parsed.version !== VERSION || !isChatState(parsed.state)) {
       return structuredClone(mockChatState)
@@ -30,11 +32,6 @@ export function loadChatState(): ChatState {
 }
 
 export function saveChatState(state: ChatState): boolean {
-  try {
-    const payload: StoredChatState = { version: VERSION, state }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
-    return true
-  } catch {
-    return false
-  }
+  const payload: StoredChatState = { version: VERSION, state }
+  return writeItem(STORAGE_KEY, JSON.stringify(payload))
 }

@@ -8,11 +8,10 @@ const TOKEN_PATTERN = /^[A-Za-z0-9]{16,}$/
 /**
  * Белый список методов GREEN-API.
  * `http` — GET или POST, `query` — какие поля payload уходят в query string,
- * `body` — поля, которые уходят в JSON-тело. `pick` собирает нужные поля.
+ * `body` — поля, которые уходят в JSON-тело.
  */
 interface MethodSpec {
   http: 'GET' | 'POST'
-  pick?: (payload: Record<string, unknown>) => Record<string, unknown>
   query?: string[]
   body?: string[]
 }
@@ -101,10 +100,16 @@ export default async function handler(request: ProxyRequest, response: ProxyResp
     return
   }
 
-  const body =
-    typeof request.body === 'string'
-      ? (JSON.parse(request.body) as Record<string, unknown>)
-      : ((request.body ?? {}) as Record<string, unknown>)
+  let body: Record<string, unknown>
+  try {
+    body =
+      typeof request.body === 'string'
+        ? (JSON.parse(request.body) as Record<string, unknown>)
+        : ((request.body ?? {}) as Record<string, unknown>)
+  } catch {
+    response.status(400).json({ status: 'error', message: 'Тело запроса — не корректный JSON' })
+    return
+  }
 
   const methodName = typeof body.method === 'string' ? body.method : ''
   const spec = METHODS[methodName]
@@ -117,9 +122,8 @@ export default async function handler(request: ProxyRequest, response: ProxyResp
     return
   }
 
-  const payload = spec.pick ? (spec.pick(body) ?? {}) : body
-  const url = buildUpstreamUrl(methodName, spec, idInstance, token, payload)
-  const requestBody = pickFields(payload, spec.body)
+  const url = buildUpstreamUrl(methodName, spec, idInstance, token, body)
+  const requestBody = pickFields(body, spec.body)
 
   try {
     const upstream = await fetch(url, {

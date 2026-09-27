@@ -8,14 +8,6 @@
   background-image: var(--pattern-chat);
 }
 
-.placeholder {
-  display: grid;
-  flex: 1;
-  place-items: center;
-  color: var(--color-text-secondary);
-  background: var(--color-bg-chat);
-}
-
 .header {
   display: flex;
   align-items: center;

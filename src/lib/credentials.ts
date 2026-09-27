@@ -1,4 +1,5 @@
 import type { GreenApiCredentials } from '../types/greenApi'
+import { readItem, removeItem, writeItem } from './safeStorage'
 
 const STORAGE_KEY = 'green-api-credentials'
 
@@ -30,8 +31,7 @@ export function validateCredentials(values: Partial<GreenApiCredentials>): Crede
 
 function isCredentials(value: unknown): value is GreenApiCredentials {
   if (typeof value !== 'object' || value === null) return false
-  const candidate = value as Partial<GreenApiCredentials>
-  return Object.keys(validateCredentials(candidate)).length === 0
+  return Object.keys(validateCredentials(value as GreenApiCredentials)).length === 0
 }
 
 export function normalizeCredentials(values: Partial<GreenApiCredentials>): GreenApiCredentials {
@@ -42,9 +42,10 @@ export function normalizeCredentials(values: Partial<GreenApiCredentials>): Gree
 }
 
 export function loadCredentials(): GreenApiCredentials | null {
+  const raw = readItem(STORAGE_KEY)
+  if (!raw) return null
+
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return null
     const parsed: unknown = JSON.parse(raw)
     return isCredentials(parsed) ? parsed : null
   } catch {
@@ -52,10 +53,10 @@ export function loadCredentials(): GreenApiCredentials | null {
   }
 }
 
-export function saveCredentials(credentials: GreenApiCredentials): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(credentials))
+export function saveCredentials(credentials: GreenApiCredentials): boolean {
+  return writeItem(STORAGE_KEY, JSON.stringify(credentials))
 }
 
 export function clearCredentials(): void {
-  localStorage.removeItem(STORAGE_KEY)
+  removeItem(STORAGE_KEY)
 }

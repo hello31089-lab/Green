@@ -8,7 +8,7 @@ import { VerifiedBadge } from '../VerifiedBadge'
 import styles from './ChatView.module.css'
 
 export interface ChatViewProps {
-  chat?: Chat
+  chat: Chat
   messages: ChatMessage[]
   onSend: (text: string) => void
   onBack?: () => void
@@ -93,10 +93,6 @@ export function ChatView({ chat, messages, onSend, onBack }: ChatViewProps) {
 
   const handleCopyCode = (code: string) => {
     void navigator.clipboard?.writeText(code)
-  }
-
-  if (!chat) {
-    return <section className={styles.placeholder}>Выберите чат, чтобы открыть переписку</section>
   }
 
   return (

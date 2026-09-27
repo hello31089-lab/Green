@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
+import { readItem, writeItem } from '../lib/safeStorage'
 
 export type Theme = 'light' | 'dark'
 
 const STORAGE_KEY = 'theme'
 
 function readTheme(): Theme {
-  const stored = localStorage.getItem(STORAGE_KEY)
+  const stored = readItem(STORAGE_KEY)
   if (stored === 'light' || stored === 'dark') return stored
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
@@ -15,7 +16,7 @@ export function useTheme() {
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
-    localStorage.setItem(STORAGE_KEY, theme)
+    writeItem(STORAGE_KEY, theme)
   }, [theme])
 
   const toggleTheme = useCallback(() => {

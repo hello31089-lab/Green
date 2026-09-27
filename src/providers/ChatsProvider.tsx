@@ -2,16 +2,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { Chat, ChatMessage, ChatState } from '../types/chat'
 import { loadChatState, saveChatState } from '../lib/storage'
+import { formatChatTime, formatTime } from '../lib/datetime'
 import { createId } from '../lib/id'
 import { ChatsContext } from './chatsContext'
 import type { ChatsContextValue } from './chatsContext'
 
 export interface ChatsProviderProps {
   children: ReactNode
-}
-
-function formatTime(date: Date): string {
-  return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
 }
 
 export function ChatsProvider({ children }: ChatsProviderProps) {
@@ -27,7 +24,7 @@ export function ChatsProvider({ children }: ChatsProviderProps) {
       id,
       name,
       lastMessage: 'Нет сообщений',
-      lastMessageAt: formatTime(new Date()),
+      lastMessageAt: formatChatTime(new Date()),
       unreadCount: 0,
     }
     setState((current) => ({

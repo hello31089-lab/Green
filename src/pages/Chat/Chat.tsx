@@ -15,7 +15,7 @@ export function Chat() {
       <div className={styles.notFound}>
         <p className={styles.notFoundTitle}>Такого чата нет</p>
         <p className={styles.notFoundText}>
-          Чат с адресом <code>{chatId}</code> не найден в localStorage
+          Переписка с адресом <code>{chatId}</code> не найдена
         </p>
         <button className={styles.backLink} type="button" onClick={() => navigate('/')}>
           ← Вернуться к чатам
