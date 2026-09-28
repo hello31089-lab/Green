@@ -27,6 +27,26 @@ export function typeLabel(type: ChatType): string {
 }
 
 /**
+ * Приводит идентификатор к строке. В MAX и WhatsApp он приходит JID-строкой,
+ * но в части ответов это число, и вызов строкового метода на числе упал бы.
+ * Ноль отбрасывается: в API он означает «значения нет», как в `phoneNumber`.
+ */
+function readId(value: string | number | undefined): string {
+  if (typeof value === 'string') return value.trim()
+  if (typeof value === 'number' && Number.isFinite(value) && value !== 0) return String(value)
+  return ''
+}
+
+function readPhone(value: number | string | undefined): number | undefined {
+  if (typeof value === 'number' && Number.isFinite(value) && value > 0) return value
+  if (typeof value === 'string') {
+    const digits = value.replace(/\D/g, '')
+    if (digits.length === 11 || digits.length === 12) return Number(digits)
+  }
+  return undefined
+}
+
+/**
  * Достаёт номер из идентификатора чата. У личного чата JID выглядит как
  * `79991234567@c.us`, а у группы локальная часть — это
  * `79526670710-1611399404`, где номер создателя группы, а не номер чата.
@@ -49,11 +69,10 @@ function unreadOf(value: number | undefined): number {
  */
 export function mapChat(source: GreenApiChat): Chat | null {
   // В MAX идентификатор лежит в поле `id`, в других ответах — в `chatId`.
-  const id = (source.id ?? source.chatId ?? '').trim()
+  const id = readId(source.id ?? source.chatId)
   if (!id) return null
 
-  const phoneNumber =
-    source.phoneNumber && source.phoneNumber > 0 ? source.phoneNumber : phoneFromJid(id)
+  const phoneNumber = readPhone(source.phoneNumber) ?? phoneFromJid(id)
 
   return {
     id,
@@ -135,15 +154,12 @@ export function mapIncomingNotification(notification: GreenApiNotification): Inc
 
   const text = messageData.textMessageData?.textMessage
   // Как и в `GetChats`, идентификатор чата приходит в поле `id`.
-  const chatId = body.senderData?.id ?? body.senderData?.chatId
+  const chatId = readId(body.senderData?.id ?? body.senderData?.chatId)
   const id = body.idMessage
   if (!text || !chatId || !id) return null
 
   const type = toChatType(body.senderData?.chatType)
-  const phoneNumber =
-    body.senderData?.senderPhoneNumber && body.senderData.senderPhoneNumber > 0
-      ? body.senderData.senderPhoneNumber
-      : phoneFromJid(chatId)
+  const phoneNumber = readPhone(body.senderData?.senderPhoneNumber) ?? phoneFromJid(chatId)
   const name =
     body.senderData?.senderContactName ||
     body.senderData?.senderName ||
@@ -196,7 +212,7 @@ export function readCheckAccount(
   // Идентификатор приходит либо как `chatId`, либо как `id`: в MAX это JID
   // вида `79526670710-1611399404@g.us`, а в Telegram — число, поэтому читаем
   // оба поля.
-  const chatId = hasAccount(response) ? (response.chatId ?? response.id) : undefined
+  const chatId = hasAccount(response) ? readId(response.chatId ?? response.id) : ''
   if (chatId) return { exists: true, chatId }
 
   return { exists: false, reason: 'На этом номере нет аккаунта' }

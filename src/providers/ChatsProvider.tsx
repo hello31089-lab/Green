@@ -274,11 +274,11 @@ export function ChatsProvider({ children }: ChatsProviderProps) {
       })
       upsertChat({ id: chatId, lastMessage: text, lastMessageAt: timestamp })
 
-      const patch = (id: string, status: ChatMessage['status']) => {
+      const patch = (id: string, status: ChatMessage['status'], error?: string) => {
         setMessages((current) => ({
           ...current,
           [chatId]: (current[chatId] ?? []).map((message) =>
-            message.id === id ? { ...message, status, pending: false } : message,
+            message.id === id ? { ...message, status, pending: false, error } : message,
           ),
         }))
       }
@@ -289,14 +289,19 @@ export function ChatsProvider({ children }: ChatsProviderProps) {
           setMessages((current) => ({
             ...current,
             [chatId]: (current[chatId] ?? []).map((message) =>
-              message.id === localId ? { ...message, id: serverId, status: 'sent' } : message,
+              message.id === localId
+                ? { ...message, id: serverId, status: 'sent', error: undefined }
+                : message,
             ),
           }))
         } else {
           patch(localId, 'sent')
         }
-      } catch {
-        patch(localId, 'failed')
+      } catch (thrown) {
+        // Причину показываем в пузыре: у отправки в WhatsApp и MAX свои
+        // требования (сохранённый контакт, квота, авторизация), и без
+        // текста ошибки непонятно, что именно не сработало.
+        patch(localId, 'failed', describeError(thrown, 'Сообщение не отправлено'))
       }
     },
     [appendMessage, credentials, upsertChat],

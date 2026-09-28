@@ -37,6 +37,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           </span>
         )}
       </span>
+      {message.error && <p className={styles.error}>{message.error}</p>}
     </div>
   )
 }

@@ -48,8 +48,12 @@ export interface StateInstanceResponse {
  * `GetChatHistory`, действительно отдаётся.
  */
 export interface GreenApiChat {
-  id?: string
-  chatId?: string
+  /**
+   * Идентификатор приходит строкой (JID) у MAX и WhatsApp, но у части
+   * методов и инстансов это число, поэтому тип расширен.
+   */
+  id?: string | number
+  chatId?: string | number
   name?: string
   type?: string
   archive?: boolean
@@ -57,7 +61,7 @@ export interface GreenApiChat {
   ephemeralSettingTimestamp?: number
   unreadCount?: number
   /** Заполняется не всегда; иначе номер берётся из JID. */
-  phoneNumber?: number
+  phoneNumber?: number | string
 }
 
 /**
@@ -66,7 +70,7 @@ export interface GreenApiChat {
  * отказа в `reason`. Идентификатор, как и в `GetChats`, является JID.
  */
 export type CheckAccountResponse =
-  | { exist: true; chatId?: string; id?: string; fromCache?: boolean }
+  | { exist: true; chatId?: string | number; id?: string | number; fromCache?: boolean }
   | { status: false; reason: string }
 
 export interface SendMessageResponse {
@@ -130,15 +134,15 @@ export interface GreenApiNotificationBody {
   idMessage?: string
   senderData?: {
     /** Идентификатор чата: в MAX приходит в поле `id` и выглядит как JID. */
-    id?: string
-    chatId?: string
+    id?: string | number
+    chatId?: string | number
     chatName?: string
     chatType?: string
     sender?: string
     senderName?: string
     senderType?: string
     senderContactName?: string
-    senderPhoneNumber?: number
+    senderPhoneNumber?: number | string
   }
   messageData?: {
     /** `textMessage` для обычного текста. */
