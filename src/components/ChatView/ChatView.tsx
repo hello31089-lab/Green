@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import type { Chat, ChatMessage } from '../../types/chat'
 import type { LoadStatus } from '../../providers/chatsContext'
 import { formatPhone, typeLabel } from '../../api/mappers'
 import { Avatar } from '../Avatar'
 import { ButtonItem } from '../ButtonItem'
+import { EmojiPicker } from '../EmojiPicker'
 import { MessageBubble } from '../MessageBubble'
 import styles from './ChatView.module.css'
 
@@ -71,9 +72,26 @@ function SmileIcon() {
 //   )
 // }
 
-function ComposerAction({ icon, label }: { icon: ReactNode; label: string }) {
+function ComposerAction({
+  icon,
+  label,
+  onClick,
+  expanded,
+}: {
+  icon: ReactNode
+  label: string
+  onClick?: () => void
+  expanded?: boolean
+}) {
   return (
-    <button className={styles.composerAction} type="button" aria-label={label} title={label}>
+    <button
+      className={styles.composerAction}
+      type="button"
+      aria-label={label}
+      title={label}
+      aria-expanded={expanded}
+      onClick={onClick}
+    >
       {icon}
     </button>
   )
@@ -88,12 +106,32 @@ export function ChatView({
   onBack,
 }: ChatViewProps) {
   const [draft, setDraft] = useState('')
+  const [isEmojiOpen, setEmojiOpen] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const caretRef = useRef<number | null>(null)
   const subtitle = formatPhone(chat.phoneNumber) || typeLabel(chat.type)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages.length])
+
+  useEffect(() => {
+    const caret = caretRef.current
+    if (caret === null) return
+    caretRef.current = null
+    inputRef.current?.setSelectionRange(caret, caret)
+  }, [draft])
+
+  const closeEmoji = useCallback(() => setEmojiOpen(false), [])
+
+  const pickEmoji = (emoji: string) => {
+    const input = inputRef.current
+    const start = input?.selectionStart ?? draft.length
+    const end = input?.selectionEnd ?? start
+    caretRef.current = start + emoji.length
+    setDraft(draft.slice(0, start) + emoji + draft.slice(end))
+  }
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -101,6 +139,7 @@ export function ChatView({
     if (!text) return
     onSend(text)
     setDraft('')
+    setEmojiOpen(false)
   }
 
   return (
@@ -137,12 +176,18 @@ export function ChatView({
       <form className={styles.composer} onSubmit={handleSubmit}>
         <input
           className={styles.input}
+          ref={inputRef}
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           placeholder="Сообщение"
           aria-label="Сообщение"
         />
-        <ComposerAction icon={<SmileIcon />} label="Эмодзи" />
+        <ComposerAction
+          icon={<SmileIcon />}
+          label="Эмодзи"
+          onClick={() => setEmojiOpen((open) => !open)}
+          expanded={isEmojiOpen}
+        />
         <ButtonItem
           icon="↑"
           label="Отправить"
@@ -152,6 +197,7 @@ export function ChatView({
           variant="primary"
           disabled={!draft.trim()}
         />
+        {isEmojiOpen && <EmojiPicker onPick={pickEmoji} onClose={closeEmoji} />}
       </form>
     </section>
   )
