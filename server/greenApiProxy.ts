@@ -5,12 +5,6 @@ const TOKEN_HEADER = 'x-green-token'
 const ID_PATTERN = /^\d{6,12}$/
 const TOKEN_PATTERN = /^[A-Za-z0-9]{16,}$/
 
-/**
- * Белый список методов GREEN-API.
- * `http` — HTTP-метод, `path` — поля, которые подставляются в путь URL,
- * `query` — какие поля payload уходят в query string,
- * `body` — поля, которые уходят в JSON-тело.
- */
 interface MethodSpec {
   http: 'GET' | 'POST' | 'DELETE'
   path?: string[]
