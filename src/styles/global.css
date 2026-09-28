@@ -13,8 +13,20 @@ body {
   background-color: var(--color-bg);
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
-  overflow: auto;
+  /* Прокручиваются панели внутри приложения, а не сама страница — иначе
+     появляется второй скроллбар и низ экрана уезжает под адресную строку. */
+  overflow: hidden;
   box-sizing: border-box;
+}
+
+/* На мобильном адресная строка меняет видимую высоту. `dvh` держит оболочку
+   ровно по видимой области, иначе низ диалога оказывается под сгибом. */
+@supports (height: 100dvh) {
+  html,
+  body,
+  #root {
+    height: 100dvh;
+  }
 }
 
 a {

@@ -13,7 +13,9 @@ html {
 }
 
 body {
-  min-height: 100vh;
+  /* Не 100vh: на мобильном это высота со скрытой адресной строкой, и низ
+     интерфейса уезжает под сгиб. Высоту задаёт global.css. */
+  min-height: 100%;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
