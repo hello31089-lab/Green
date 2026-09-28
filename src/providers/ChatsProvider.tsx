@@ -316,6 +316,10 @@ export function ChatsProvider({ children }: ChatsProviderProps) {
     const { signal } = controller
     let pause = POLL_PAUSE_MS
 
+    if (import.meta.env.DEV) {
+      console.info('[incoming] очередь уведомлений опрашивается')
+    }
+
     void (async () => {
       while (!signal.aborted) {
         try {

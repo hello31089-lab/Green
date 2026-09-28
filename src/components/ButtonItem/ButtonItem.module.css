@@ -9,6 +9,9 @@
     background-color 0.15s ease,
     color 0.15s ease,
     border-color 0.15s ease;
+  font-weight: 500;
+  font-size: 20px;
+  padding-bottom: 4px;
 }
 
 .item > svg {
@@ -24,13 +27,12 @@
 .sm {
   width: 32px;
   height: 32px;
-  font-size: 17px;
 }
 
 .md {
   width: 40px;
   height: 40px;
-  font-size: 20px;
+  font-size: 25px;
 }
 
 .rounded {

@@ -17,28 +17,29 @@ export interface ChatViewProps {
   onBack?: () => void
 }
 
-function StickerIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-      <rect x="3" y="3" width="18" height="18" rx="5" />
-      <circle cx="9" cy="10" r="1.4" fill="currentColor" stroke="none" />
-      <circle cx="15" cy="10" r="1.4" fill="currentColor" stroke="none" />
-      <path d="M8.5 15c1 1.2 2.2 1.8 3.5 1.8s2.5-.6 3.5-1.8" strokeLinecap="round" />
-    </svg>
-  )
-}
+//TODO
+// function StickerIcon() {
+//   return (
+//     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+//       <rect x="3" y="3" width="18" height="18" rx="5" />
+//       <circle cx="9" cy="10" r="1.4" fill="currentColor" stroke="none" />
+//       <circle cx="15" cy="10" r="1.4" fill="currentColor" stroke="none" />
+//       <path d="M8.5 15c1 1.2 2.2 1.8 3.5 1.8s2.5-.6 3.5-1.8" strokeLinecap="round" />
+//     </svg>
+//   )
+// }
 
-function ClipIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-      <path
-        d="M20 11.5 12 19.5a4.5 4.5 0 0 1-6.4-6.4l8-8a3 3 0 0 1 4.3 4.3l-8 8a1.5 1.5 0 0 1-2.2-2.1l7.3-7.3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
+// function ClipIcon() {
+//   return (
+//     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+//       <path
+//         d="M20 11.5 12 19.5a4.5 4.5 0 0 1-6.4-6.4l8-8a3 3 0 0 1 4.3 4.3l-8 8a1.5 1.5 0 0 1-2.2-2.1l7.3-7.3"
+//         strokeLinecap="round"
+//         strokeLinejoin="round"
+//       />
+//     </svg>
+//   )
+// }
 
 function SmileIcon() {
   return (
@@ -50,25 +51,25 @@ function SmileIcon() {
     </svg>
   )
 }
+//TODO
+// function SearchIcon() {
+//   return (
+//     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+//       <circle cx="11" cy="11" r="7" />
+//       <path d="M20 20l-3.5-3.5" strokeLinecap="round" />
+//     </svg>
+//   )
+// }
 
-function SearchIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-      <circle cx="11" cy="11" r="7" />
-      <path d="M20 20l-3.5-3.5" strokeLinecap="round" />
-    </svg>
-  )
-}
-
-function MenuIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <circle cx="5" cy="12" r="1.8" />
-      <circle cx="12" cy="12" r="1.8" />
-      <circle cx="19" cy="12" r="1.8" />
-    </svg>
-  )
-}
+// function MenuIcon() {
+//   return (
+//     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+//       <circle cx="5" cy="12" r="1.8" />
+//       <circle cx="12" cy="12" r="1.8" />
+//       <circle cx="19" cy="12" r="1.8" />
+//     </svg>
+//   )
+// }
 
 function ComposerAction({ icon, label }: { icon: ReactNode; label: string }) {
   return (
@@ -113,8 +114,6 @@ export function ChatView({
           <span className={styles.headerName}>{chat.name}</span>
           <span className={styles.headerSubtitle}>{subtitle}</span>
         </div>
-        <ButtonItem icon={<SearchIcon />} label="Поиск" shape="circle" size="sm" />
-        <ButtonItem icon={<MenuIcon />} label="Меню" shape="circle" size="sm" />
       </header>
 
       <div className={styles.messages}>
@@ -136,8 +135,6 @@ export function ChatView({
       </div>
 
       <form className={styles.composer} onSubmit={handleSubmit}>
-        <ComposerAction icon={<StickerIcon />} label="Стикеры" />
-        <ComposerAction icon={<ClipIcon />} label="Прикрепить файл" />
         <input
           className={styles.input}
           value={draft}
@@ -149,6 +146,7 @@ export function ChatView({
         <ButtonItem
           icon="↑"
           label="Отправить"
+          size="sm"
           type="submit"
           shape="circle"
           variant="primary"

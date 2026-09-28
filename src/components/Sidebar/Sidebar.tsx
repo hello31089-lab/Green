@@ -60,7 +60,7 @@ export function Sidebar({
         <ButtonItem
           icon="+"
           label="Добавить чат"
-          shape="circle"
+          shape="rounded"
           size="sm"
           variant="primary"
           onClick={onAddChat}

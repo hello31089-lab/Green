@@ -26,11 +26,16 @@ export function typeLabel(type: ChatType): string {
   return TYPE_LABELS[type]
 }
 
-/**
- * Приводит идентификатор к строке. В MAX и WhatsApp он приходит JID-строкой,
- * но в части ответов это число, и вызов строкового метода на числе упал бы.
- * Ноль отбрасывается: в API он означает «значения нет», как в `phoneNumber`.
- */
+// Включать, когда разбираем форму уведомлений: в консоль попадает всё, что
+// приложение не смогло прочитать, с причиной.
+const DEBUG_INCOMING = import.meta.env.DEV
+
+function skip(notification: GreenApiNotification, reason: string): null {
+  if (DEBUG_INCOMING) console.info('[incoming] пропущено:', reason, notification)
+  return null
+}
+
+/** Идентификатор приходит строкой или числом; 0 и NaN — «значения нет». */
 function readId(value: string | number | undefined): string {
   if (typeof value === 'string') return value.trim()
   if (typeof value === 'number' && Number.isFinite(value) && value !== 0) return String(value)
@@ -147,16 +152,23 @@ export interface IncomingText {
  */
 export function mapIncomingNotification(notification: GreenApiNotification): IncomingText | null {
   const body = notification.body
-  if (!body || body.typeWebhook !== 'incomingMessageReceived') return null
+  if (!body) return skip(notification, 'нет body')
+  if (body.typeWebhook !== 'incomingMessageReceived') {
+    return skip(notification, `typeWebhook=${body.typeWebhook}`)
+  }
 
   const messageData = body.messageData
-  if (!messageData || !TEXT_TYPES.includes(messageData.typeMessage ?? '')) return null
+  if (!messageData) return skip(notification, 'нет messageData')
+  if (!TEXT_TYPES.includes(messageData.typeMessage ?? '')) {
+    return skip(notification, `не текст: ${messageData.typeMessage}`)
+  }
 
   const text = messageData.textMessageData?.textMessage
-  // Как и в `GetChats`, идентификатор чата приходит в поле `id`.
   const chatId = readId(body.senderData?.id ?? body.senderData?.chatId)
   const id = body.idMessage
-  if (!text || !chatId || !id) return null
+  if (!text) return skip(notification, 'нет textMessageData.textMessage')
+  if (!chatId) return skip(notification, 'нет senderData.id/chatId')
+  if (!id) return skip(notification, 'нет idMessage')
 
   const type = toChatType(body.senderData?.chatType)
   const phoneNumber = readPhone(body.senderData?.senderPhoneNumber) ?? phoneFromJid(chatId)
