@@ -3,6 +3,8 @@
   flex: 1;
   flex-direction: column;
   overflow-y: auto;
+  /* Место под плавающую кнопку выхода, чтобы она не закрывала последний чат. */
+  padding-bottom: 56px;
 }
 
 .empty {

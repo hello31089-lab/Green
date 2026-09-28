@@ -6,6 +6,7 @@ import { ChatList } from '../ChatList'
 import { SearchBar } from '../SearchBar'
 import { Title } from '../Title'
 import { useTheme } from '../../hooks/useTheme'
+import { useCredentials } from '../../hooks/useCredentials'
 import styles from './Sidebar.module.css'
 
 export interface SidebarProps {
@@ -32,6 +33,7 @@ export function Sidebar({
 }: SidebarProps) {
   const [query, setQuery] = useState('')
   const { theme, toggleTheme } = useTheme()
+  const { signOut } = useCredentials()
 
   const filteredChats = useMemo(() => {
     const normalized = query.trim().toLowerCase()
@@ -75,6 +77,15 @@ export function Sidebar({
         pollError={pollError}
         onSelect={onSelectChat}
         onRetry={onRetry}
+      />
+      <ButtonItem
+        icon="⏻"
+        label="Выйти"
+        shape="circle"
+        size="sm"
+        variant="surface"
+        className={styles.signOut}
+        onClick={signOut}
       />
     </aside>
   )
