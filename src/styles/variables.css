@@ -17,6 +17,9 @@
   --color-hover: #f2f2f2;
   --color-badge: #2b7de9;
 
+  --scrollbar-thumb: #cdd2d8;
+  --scrollbar-thumb-hover: #a8b0b9;
+
   /* Акцент логотипа. Раньше здесь был фиолетовый фирменный цвет MAX,
      но приложение работает с несколькими мессенджерами, поэтому берём
      собственный основной цвет. */
@@ -69,6 +72,9 @@
   --color-border: #2b3742;
   --color-hover: #242f3d;
   --color-badge: #4b95f5;
+
+  --scrollbar-thumb: #39434f;
+  --scrollbar-thumb-hover: #4d5a68;
 
   --shadow-bubble: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
