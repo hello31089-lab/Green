@@ -19,10 +19,27 @@
 
 ## Запуск
 
+Нужен Node.js 20.19+ или 22.12+ (требование Vite) и npm.
+
 ```bash
 npm install
-npm run dev      # http://localhost:5173
-npm run build    # tsc -b && vite build
+npm run dev
+```
+
+Заходить по адресу **http://localhost:5173**. Учётные данные инстанса
+(`idInstance` и `apiTokenInstance`) вводятся в форме на странице и сохраняются
+в `localStorage` браузера.
+
+С телефона в той же сети — `npm run dev -- --host` и адрес
+http://<IP-компьютера>:5173 (`ipconfig`, например 192.168.0.179). Флаг нужен
+потому, что по умолчанию Vite слушает только localhost. Телефон и компьютер
+должны быть в одной сети, а брандмауэр Windows — разрешать Node.js в частных
+сетях. Адрес из локальной сети отдаёт приложение всем, кто в ней есть.
+
+Остальные команды:
+
+```bash
+npm run build     # tsc -b && vite build
 npm run preview
 npm run lint
 npm run format
