@@ -5,6 +5,13 @@ const CHATS_KEY = 'green-api-chats'
 const CONTACTS_KEY = 'green-api-contacts'
 const VERSION = 3
 
+/**
+ * `GetChats` не отдаёт текст последнего сообщения, поэтому превью берётся
+ * только из локального кэша и обновить его нечем. А сообщения могли удалить
+ * на телефоне — через сутки превью считаем устаревшим и убираем.
+ */
+const PREVIEW_TTL_MS = 24 * 60 * 60 * 1000
+
 interface StoredChats {
   version: number
   chats: Chat[]
@@ -31,9 +38,19 @@ function parseChats(raw: string | null): Chat[] {
     return parsed.chats
       .filter(isChat)
       .map((chat) => ({ ...chat, unreadCount: chat.unreadCount ?? 0 }))
+      .map(dropStalePreview)
   } catch {
     return []
   }
+}
+
+function dropStalePreview(chat: Chat): Chat {
+  if (chat.lastMessageAt === undefined) return chat
+  if (Date.now() - chat.lastMessageAt * 1000 < PREVIEW_TTL_MS) return chat
+  const rest = { ...chat }
+  delete rest.lastMessage
+  delete rest.lastMessageAt
+  return rest
 }
 
 export function loadChats(): Chat[] {
