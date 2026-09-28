@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { Auth } from '../pages/Auth'
 import { ErrorBoundary } from '../components/ErrorBoundary'
+import { Loader } from '../components/Loader'
 import { useCredentials } from '../hooks/useCredentials'
 import styles from './AppRoutes.module.css'
 
@@ -10,7 +11,7 @@ const AuthenticatedRoutes = lazy(() => import('./AuthenticatedRoutes'))
 function Splash({ label }: { label: string }) {
   return (
     <div className={styles.splash} role="status">
-      {label}
+      <Loader label={label} />
     </div>
   )
 }

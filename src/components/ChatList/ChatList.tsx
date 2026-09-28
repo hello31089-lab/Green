@@ -1,6 +1,7 @@
 import type { Chat } from '../../types/chat'
 import type { LoadStatus } from '../../providers/chatsContext'
 import { ChatItem } from '../ChatItem'
+import { Loader } from '../Loader'
 import styles from './ChatList.module.css'
 
 export interface ChatListProps {
@@ -33,7 +34,7 @@ export function ChatList({
     return (
       <>
         {notice}
-        <p className={styles.empty}>Загружаем чаты…</p>
+        <Loader label="Загружаем чаты…" />
       </>
     )
   }

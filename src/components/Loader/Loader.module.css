@@ -1,0 +1,14 @@
+.image {
+  display: block;
+  width: 120px;
+  height: auto;
+  margin: 24px auto;
+}
+
+.text {
+  margin: 0;
+  padding: 24px 12px;
+  font-size: var(--font-size-preview);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
