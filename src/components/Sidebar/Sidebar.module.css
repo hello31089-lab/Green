@@ -16,13 +16,16 @@
   padding: 14px 12px 10px 16px;
 }
 
-/* Плавающая кнопка выхода в правом нижнем углу сайдбара. */
 .signOut {
   position: absolute;
   right: 12px;
   bottom: 12px;
   z-index: 1;
   box-shadow: var(--shadow-bubble);
+}
+
+.signOut:hover {
+  background-color: var(--color-bg-danger);
 }
 
 @media (max-width: 900px) {

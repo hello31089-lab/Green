@@ -5,23 +5,12 @@ const CHATS_KEY = 'green-api-chats'
 const CONTACTS_KEY = 'green-api-contacts'
 const VERSION = 3
 
-/**
- * `GetChats` не отдаёт текст последнего сообщения, поэтому превью берётся
- * только из локального кэша и обновить его нечем. А сообщения могли удалить
- * на телефоне — через сутки превью считаем устаревшим и убираем.
- */
 const PREVIEW_TTL_MS = 24 * 60 * 60 * 1000
 
 interface StoredChats {
   version: number
   chats: Chat[]
 }
-
-/**
- * `GetChats` не отдаёт ни последнего сообщения, ни счётчика непрочитанных,
- * поэтому список чатов храним локально и дополняем ответом API. Сообщения
- * не сохраняем: их источник истины — `GetChatHistory`.
- */
 
 function isChat(value: unknown): value is Chat {
   if (typeof value !== 'object' || value === null) return false
@@ -62,11 +51,6 @@ export function saveChats(chats: Chat[]): boolean {
   return writeItem(CHATS_KEY, JSON.stringify(payload))
 }
 
-/**
- * Кэш «номер → chatId». `CheckAccount` расходует квоту тарифа (100 проверок
- * в месяц на Developer), а `chatId` между сессиями не меняется, поэтому
- * повторно проверять уже известные номера не нужно.
- */
 export function loadContacts(): Record<string, string> {
   const raw = readItem(CONTACTS_KEY)
   if (!raw) return {}

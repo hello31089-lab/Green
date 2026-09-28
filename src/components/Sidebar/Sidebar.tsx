@@ -79,7 +79,7 @@ export function Sidebar({
         onRetry={onRetry}
       />
       <ButtonItem
-        icon="⏻"
+        icon="⎋"
         label="Выйти"
         shape="circle"
         size="sm"
